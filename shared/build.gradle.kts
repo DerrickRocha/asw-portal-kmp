@@ -39,6 +39,7 @@ kotlin {
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
+            implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -53,6 +54,7 @@ kotlin {
             implementation(libs.ktor.client.cio)
         }
         commonTest.dependencies {
+            implementation(libs.ktor.client.darwin)
             implementation(libs.kotlin.test)
         }
     }
