@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.request
 import io.ktor.client.statement.bodyAsText
@@ -11,8 +12,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.headers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.io.IOException
 import org.example.asw_portal_kmp.data.KeyValuePairManager
 
@@ -56,27 +55,31 @@ class NetworkManager(
         return headers
     }
 
-    suspend fun get(url: String, params: Map<String, String>, options: RequestOptions): String {
-        val headerMap = buildHeaders(options.isAuthRequired, options.isTenantRequired)
+    suspend fun <T>get(url: String, params: Map<String, String>, options: RequestOptions): Result<T> {
 
-        val response = client.request(url) {
-            method = HttpMethod.Get
-            contentType(ContentType.Application.Json)
-            headers {
-                headerMap.forEach { (key, value) ->
-                    append(key, value)
+        return runCatching {
+            val headerMap = buildHeaders(options.isAuthRequired, options.isTenantRequired)
+
+            val response = client.request(url) {
+                method = HttpMethod.Get
+                contentType(ContentType.Application.Json)
+                headers {
+                    headerMap.forEach { (key, value) ->
+                        append(key, value)
+                    }
+                }
+                url {
+                    params.forEach { (key, value) ->
+                        parameters.append(key, value)
+                    }
+                }
+                timeout {
+                    requestTimeoutMillis = options.timeout ?: 10000
                 }
             }
-            url {
-                params.forEach { (key, value) ->
-                    parameters.append(key, value)
-                }
-            }
-            timeout {
-                requestTimeoutMillis = options.timeout ?: 10000
-            }
+            if (response.status.value in 200..299) return response.body()
+            else throw Exception("Error: ${response.status.value} - ${response.bodyAsText()}")
         }
-        val body = response.bodyAsText()
-        return body
+
     }
 }
