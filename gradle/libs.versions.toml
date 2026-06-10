@@ -15,6 +15,7 @@ kotlin = "2.4.0"
 kotlinx-coroutines = "1.11.0"
 material3 = "1.11.0-alpha07"
 ktor-client = "3.5.0"
+dataStore = "1.2.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -39,6 +40,8 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-cl
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor-client"}
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor-client"}
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor-client"}
+dataStore-library = { module = "androidx.datastore:datastore", version.ref = "dataStore"}
+dataStore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStore"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -52,6 +52,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.cio)
+            implementation(libs.dataStore.library)
+            implementation(libs.dataStore.preferences)
         }
         commonTest.dependencies {
             implementation(libs.ktor.client.darwin)
