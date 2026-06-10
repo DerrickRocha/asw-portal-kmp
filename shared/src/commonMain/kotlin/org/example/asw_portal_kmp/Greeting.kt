@@ -4,6 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import org.example.asw_portal_kmp.data.createDataStore
 import org.example.asw_portal_kmp.network.api.NetworkManager
 import org.example.asw_portal_kmp.network.api.RequestOptions
 
@@ -16,7 +17,8 @@ class Greeting {
         }
         expectSuccess = true
     }
-    private val networkManager = NetworkManager(client)
+    val store = createDataStore()
+    private val networkManager = NetworkManager(client, store)
     suspend fun greet(): String {
         try {
             val response = networkManager.get("/auth/login", emptyMap(), RequestOptions())
