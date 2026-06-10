@@ -14,6 +14,7 @@ import io.ktor.http.headers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.io.IOException
+import org.example.asw_portal_kmp.data.KeyValuePairManager
 
 class AuthenticationException(message: String) : IOException(message)
 class TenantException(message: String) : IOException(message)
@@ -25,30 +26,13 @@ data class RequestOptions(
 
 class NetworkManager(
     private val client: HttpClient,
-    private val store: DataStore<Preferences>
+    private val manager: KeyValuePairManager
 ) {
 
     companion object {
-        // Preference keys
-        private val KEY_ID_TOKEN = stringPreferencesKey("auth_token")
-        private val KEY_TENANT_ID = stringPreferencesKey("tenant_id")
-
-        // Header names
         private const val HEADER_AUTHORIZATION = "Authorization"
         private const val HEADER_TENANT_ID = "X-Tenant-Id"
         private const val TOKEN_PREFIX = "Bearer "
-    }
-
-    private suspend fun getAuthToken(): String? {
-        return store.data.map { preferences ->
-            preferences[KEY_ID_TOKEN]
-        }.first()
-    }
-
-    private suspend fun getTenantId(): String? {
-        return store.data.map { preferences ->
-            preferences[KEY_TENANT_ID]
-        }.first()
     }
 
     private suspend fun buildHeaders(
@@ -58,13 +42,13 @@ class NetworkManager(
         val headers = mutableMapOf<String, String>()
 
         if (isAuthRequired) {
-            val token = getAuthToken()
+            val token = manager.getIdToken()
                 ?: throw AuthenticationException("Authentication required but no token found in DataStore")
             headers[HEADER_AUTHORIZATION] = "$TOKEN_PREFIX$token"
         }
 
         if (isTenantRequired) {
-            val tenantId = getTenantId()
+            val tenantId = manager.getTenantId()
                 ?: throw TenantException("Tenant ID required but no tenant ID found in DataStore")
             headers[HEADER_TENANT_ID] = tenantId
         }
