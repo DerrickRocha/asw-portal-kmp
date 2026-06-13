@@ -16,6 +16,7 @@ kotlinx-coroutines = "1.11.0"
 material3 = "1.11.0-alpha07"
 ktor-client = "3.5.0"
 dataStore = "1.2.1"
+mokkery = "3.4.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -36,10 +37,13 @@ compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMul
 compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines"}
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-client"}
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor-client"}
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor-client"}
 ktor-client-serialization = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor-client"}
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor-client"}
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor-client"}
 
 dataStore-library = { module = "androidx.datastore:datastore", version.ref = "dataStore"}
 dataStore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStore"}
@@ -51,4 +55,5 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMul
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-ktor-serialization = { id = "plugin.serialization", version.ref = "ktor-client"}
+ktor-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin"}
+mokkery = { id = "dev.mokkery", version.ref = "mokkery"}

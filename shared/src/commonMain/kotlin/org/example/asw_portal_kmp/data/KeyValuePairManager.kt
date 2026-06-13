@@ -7,9 +7,17 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-class KeyValuePairManager(
+
+interface KeyValuePairManager {
+    suspend fun getIdToken(): String?
+    suspend fun getTenantId(): String?
+    suspend fun saveIdToken(token: String)
+    suspend fun saveTenantId(tenantId: String)
+}
+
+class KeyValuePairManagerImplementation(
     private val store: DataStore<Preferences>
-) {
+): KeyValuePairManager {
 
     companion object {
         // Preference keys
@@ -22,25 +30,25 @@ class KeyValuePairManager(
         private const val TOKEN_PREFIX = "Bearer "
     }
 
-    suspend fun getIdToken(): String? {
+    override suspend fun getIdToken(): String? {
         return store.data.map { preferences ->
             preferences[KEY_ID_TOKEN]
         }.first()
     }
 
-    suspend fun getTenantId(): String? {
+    override suspend fun getTenantId(): String? {
         return store.data.map { preferences ->
             preferences[KEY_TENANT_ID]
         }.first()
     }
 
-    suspend fun saveIdToken(token: String) {
+    override suspend fun saveIdToken(token: String) {
         store.edit { preferences ->
             preferences[KEY_ID_TOKEN] = token
         }
     }
 
-    suspend fun saveTenantId(tenantId: String) {
+    override suspend fun saveTenantId(tenantId: String) {
         store.edit { preferences ->
             preferences[KEY_TENANT_ID] = tenantId
         }

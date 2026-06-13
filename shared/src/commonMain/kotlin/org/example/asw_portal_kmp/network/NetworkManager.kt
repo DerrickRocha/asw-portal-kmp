@@ -1,4 +1,4 @@
-package org.example.asw_portal_kmp.network.api
+package org.example.asw_portal_kmp.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.timeout

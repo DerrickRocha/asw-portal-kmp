@@ -5,9 +5,10 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import org.example.asw_portal_kmp.data.KeyValuePairManager
+import org.example.asw_portal_kmp.data.KeyValuePairManagerImplementation
 import org.example.asw_portal_kmp.data.createDataStore
-import org.example.asw_portal_kmp.network.api.NetworkManager
-import org.example.asw_portal_kmp.network.api.RequestOptions
+import org.example.asw_portal_kmp.network.NetworkManager
+import org.example.asw_portal_kmp.network.RequestOptions
 
 class Greeting {
     private val platform = getPlatform()
@@ -19,7 +20,7 @@ class Greeting {
         expectSuccess = true
     }
     val store = createDataStore()
-    private val kvManager = KeyValuePairManager(store)
+    private val kvManager = KeyValuePairManagerImplementation(store)
     private val networkManager = NetworkManager(client, kvManager)
     suspend fun greet(): String {
         try {
