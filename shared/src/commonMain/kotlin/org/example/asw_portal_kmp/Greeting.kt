@@ -23,7 +23,14 @@ class Greeting {
     private val networkManager = NetworkManager(client, kvManager)
     suspend fun greet(): String {
         try {
-            val response = networkManager.get<String>("/auth/login", emptyMap(), RequestOptions())
+            val response = networkManager.get<Int>(
+                "/auth/login",
+                emptyMap(),
+                RequestOptions(),
+                deserialize = { value ->
+                    value.toInt()
+                }
+            )
             println(response)
         } catch (e: Exception) {
             e.printStackTrace()
