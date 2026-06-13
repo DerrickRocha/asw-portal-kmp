@@ -3,6 +3,7 @@ package org.example.asw_portal_kmp.network.api
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.request
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
@@ -10,6 +11,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.headers
 import kotlinx.io.IOException
+import kotlinx.serialization.json.Json
 import org.example.asw_portal_kmp.data.KeyValuePairManager
 
 class AuthenticationException(message: String) : IOException(message)
@@ -67,22 +69,27 @@ class NetworkManager(
         return headers
     }
 
-    suspend fun <T> get(
+    // Generic request method to avoid code duplication
+    private suspend fun <T, R> executeRequest(
+        method: HttpMethod,
         url: String,
+        requestBody: T? = null,
         params: Map<String, String> = emptyMap(),
         options: RequestOptions = RequestOptions(),
-        deserialize: (String) -> T
-    ): NetworkResult<T> {
-
+        serialize: (T) -> String = { it.toString() },
+        deserialize: (String) -> R
+    ): NetworkResult<R> {
         return try {
             val headerMap = buildHeaders(options.isAuthRequired, options.isTenantRequired)
 
             val response = client.request(url) {
-                method = HttpMethod.Get
+                this.method = method
                 contentType(ContentType.Application.Json)
                 headers { headerMap.forEach { (key, value) -> append(key, value) } }
                 url { params.forEach { (key, value) -> parameters.append(key, value) } }
                 timeout { requestTimeoutMillis = options.timeout ?: 10000 }
+
+                requestBody?.let { setBody(serialize(it)) }
             }
 
             val body = response.bodyAsText()
@@ -108,5 +115,233 @@ class NetworkManager(
                 else -> NetworkResult.Exception(e)
             }
         }
+    }
+
+    // GET method
+    suspend fun <T> get(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        deserialize: (String) -> T
+    ): NetworkResult<T> {
+        return executeRequest(
+            method = HttpMethod.Get,
+            url = url,
+            requestBody = null,
+            params = params,
+            options = options,
+            deserialize = deserialize
+        )
+    }
+
+    // POST method
+    suspend fun <T, R> post(
+        url: String,
+        requestBody: T,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        serialize: (T) -> String = { it.toString() },
+        deserialize: (String) -> R
+    ): NetworkResult<R> {
+        return executeRequest(
+            method = HttpMethod.Post,
+            url = url,
+            requestBody = requestBody,
+            params = params,
+            options = options,
+            serialize = serialize,
+            deserialize = deserialize
+        )
+    }
+
+    // POST without response body
+    suspend fun post(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions()
+    ): NetworkResult<Unit> {
+        return post<Unit, Unit>(
+            url = url,
+            requestBody = Unit,
+            params = params,
+            options = options,
+            serialize = { "" },
+            deserialize = { Unit }
+        )
+    }
+
+    // PUT method
+    suspend fun <T, R> put(
+        url: String,
+        requestBody: T,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        serialize: (T) -> String = { it.toString() },
+        deserialize: (String) -> R
+    ): NetworkResult<R> {
+        return executeRequest(
+            method = HttpMethod.Put,
+            url = url,
+            requestBody = requestBody,
+            params = params,
+            options = options,
+            serialize = serialize,
+            deserialize = deserialize
+        )
+    }
+
+    // PUT without response body
+    suspend fun put(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions()
+    ): NetworkResult<Unit> {
+        return put<Unit, Unit>(
+            url = url,
+            requestBody = Unit,
+            params = params,
+            options = options,
+            serialize = { "" },
+            deserialize = { Unit }
+        )
+    }
+
+    // PATCH method
+    suspend fun <T, R> patch(
+        url: String,
+        requestBody: T,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        serialize: (T) -> String = { it.toString() },
+        deserialize: (String) -> R
+    ): NetworkResult<R> {
+        return executeRequest(
+            method = HttpMethod.Patch,
+            url = url,
+            requestBody = requestBody,
+            params = params,
+            options = options,
+            serialize = serialize,
+            deserialize = deserialize
+        )
+    }
+
+    // PATCH without response body
+    suspend fun patch(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions()
+    ): NetworkResult<Unit> {
+        return patch<Unit, Unit>(
+            url = url,
+            requestBody = Unit,
+            params = params,
+            options = options,
+            serialize = { "" },
+            deserialize = { Unit }
+        )
+    }
+
+    // DELETE method (typically no request body)
+    suspend fun <R> delete(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        deserialize: (String) -> R
+    ): NetworkResult<R> {
+        return executeRequest(
+            method = HttpMethod.Delete,
+            url = url,
+            requestBody = null,
+            params = params,
+            options = options,
+            deserialize = deserialize
+        )
+    }
+
+    // DELETE without response body
+    suspend fun delete(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions()
+    ): NetworkResult<Unit> {
+        return delete<Unit>(
+            url = url,
+            params = params,
+            options = options,
+            deserialize = { Unit }
+        )
+    }
+
+    // DELETE with request body (less common but sometimes needed)
+    suspend fun <T, R> deleteWithBody(
+        url: String,
+        requestBody: T,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        serialize: (T) -> String = { it.toString() },
+        deserialize: (String) -> R
+    ): NetworkResult<R> {
+        return executeRequest(
+            method = HttpMethod.Delete,
+            url = url,
+            requestBody = requestBody,
+            params = params,
+            options = options,
+            serialize = serialize,
+            deserialize = deserialize
+        )
+    }
+
+    // Convenience methods with JSON serialization (using kotlinx.serialization)
+    suspend inline fun <reified T, reified R> getJson(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
+    ): NetworkResult<R> {
+        return get(url, params, options, deserialize)
+    }
+
+    suspend inline fun <reified T, reified R> postJson(
+        url: String,
+        requestBody: T,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        noinline serialize: (T) -> String = { Json.encodeToString(it) },
+        noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
+    ): NetworkResult<R> {
+        return post(url, requestBody, params, options, serialize, deserialize)
+    }
+
+    suspend inline fun <reified T, reified R> putJson(
+        url: String,
+        requestBody: T,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        noinline serialize: (T) -> String = { Json.encodeToString(it) },
+        noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
+    ): NetworkResult<R> {
+        return put(url, requestBody, params, options, serialize, deserialize)
+    }
+
+    suspend inline fun <reified T, reified R> patchJson(
+        url: String,
+        requestBody: T,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        noinline serialize: (T) -> String = { Json.encodeToString(it) },
+        noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
+    ): NetworkResult<R> {
+        return patch(url, requestBody, params, options, serialize, deserialize)
+    }
+
+    suspend inline fun <reified R> deleteJson(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
+    ): NetworkResult<R> {
+        return delete(url, params, options, deserialize)
     }
 }

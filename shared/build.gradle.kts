@@ -52,11 +52,11 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.cio)
+            implementation(libs.ktor.client.serialization)
             implementation(libs.dataStore.library)
             implementation(libs.dataStore.preferences)
         }
         commonTest.dependencies {
-            implementation(libs.ktor.client.darwin)
             implementation(libs.kotlin.test)
         }
     }
