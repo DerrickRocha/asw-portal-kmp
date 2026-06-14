@@ -30,16 +30,16 @@ class Greeting {
     private val networkManager = NetworkManager(client, kvManager)
 
     @Serializable
+    private data class LoginResponse(val accessToken: String, val idToken: String, val refreshToken: String)
+    @Serializable
     private data class LoginRequest(val email: String, val password: String)
     suspend fun greet(): String {
         try {
-            val response = networkManager.post<LoginRequest, String>(
+            val response = networkManager.postJson<LoginRequest, LoginResponse>(
                 "/auth/login",
                 LoginRequest("drocha616@gmail.com", "JonSnow_666"),
-                deserialize = { value ->
-                    value
-                }
             )
+            println(response)
         } catch (e: Exception) {
             e.printStackTrace()
         }

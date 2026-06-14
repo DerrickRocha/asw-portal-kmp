@@ -10,7 +10,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
-import io.ktor.http.headers
 import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 import org.example.asw_portal_kmp.data.KeyValuePairManager
@@ -89,7 +88,7 @@ class NetworkManager(
                     header(key, value)
                 }
                 url { params.forEach { (key, value) -> parameters.append(key, value) } }
-             //   timeout { requestTimeoutMillis = options.timeout ?: 10000 }
+                timeout { requestTimeoutMillis = options.timeout ?: 10000 }
 
                 requestBody?.let {
                     setBody(it)
@@ -100,12 +99,8 @@ class NetworkManager(
             val statusCode = response.status.value
 
             if (statusCode in 200..299) {
-                try {
-                    val data = deserialize(body)
-                    NetworkResult.Success(data, statusCode, response.headers)
-                } catch (e: Exception) {
-                    NetworkResult.Exception(JsonParsingException("Failed to parse response: ${e.message}", e))
-                }
+                val data = deserialize(body)
+                NetworkResult.Success(data, statusCode, response.headers)
             } else {
                 NetworkResult.Error(
                     message = "HTTP $statusCode: ${response.status.description}",
@@ -162,12 +157,12 @@ class NetworkManager(
         params: Map<String, String> = emptyMap(),
         options: RequestOptions = RequestOptions()
     ): NetworkResult<Unit> {
-        return post<Unit, Unit>(
+        return post(
             url = url,
             requestBody = Unit,
             params = params,
             options = options,
-            deserialize = { Unit }
+            deserialize = { }
         )
     }
 
@@ -195,12 +190,12 @@ class NetworkManager(
         params: Map<String, String> = emptyMap(),
         options: RequestOptions = RequestOptions()
     ): NetworkResult<Unit> {
-        return put<Unit, Unit>(
+        return put(
             url = url,
             requestBody = Unit,
             params = params,
             options = options,
-            deserialize = { Unit }
+            deserialize = { }
         )
     }
 
@@ -228,12 +223,12 @@ class NetworkManager(
         params: Map<String, String> = emptyMap(),
         options: RequestOptions = RequestOptions()
     ): NetworkResult<Unit> {
-        return patch<Unit, Unit>(
+        return patch(
             url = url,
             requestBody = Unit,
             params = params,
             options = options,
-            deserialize = { Unit }
+            deserialize = { }
         )
     }
 
@@ -260,11 +255,11 @@ class NetworkManager(
         params: Map<String, String> = emptyMap(),
         options: RequestOptions = RequestOptions()
     ): NetworkResult<Unit> {
-        return delete<Unit>(
+        return delete(
             url = url,
             params = params,
             options = options,
-            deserialize = { Unit }
+            deserialize = { }
         )
     }
 
