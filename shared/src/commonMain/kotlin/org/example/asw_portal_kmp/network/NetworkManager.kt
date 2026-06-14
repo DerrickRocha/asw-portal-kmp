@@ -2,6 +2,7 @@ package org.example.asw_portal_kmp.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.timeout
+import io.ktor.client.request.header
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -56,7 +57,7 @@ class NetworkManager(
 
         if (isAuthRequired) {
             val token = manager.getIdToken()
-                ?: throw AuthenticationException("Authentication required but no token found in DataStore")
+            if(token.isNullOrBlank()) throw AuthenticationException("Authentication required but no token found in DataStore")
             headers[HEADER_AUTHORIZATION] = "$TOKEN_PREFIX$token"
         }
 
@@ -76,7 +77,6 @@ class NetworkManager(
         requestBody: T? = null,
         params: Map<String, String> = emptyMap(),
         options: RequestOptions = RequestOptions(),
-        serialize: (T) -> String = { it.toString() },
         deserialize: (String) -> R
     ): NetworkResult<R> {
         return try {
@@ -85,11 +85,15 @@ class NetworkManager(
             val response = client.request(url) {
                 this.method = method
                 contentType(ContentType.Application.Json)
-                headers { headerMap.forEach { (key, value) -> append(key, value) } }
+                headerMap.forEach { (key, value) ->
+                    header(key, value)
+                }
                 url { params.forEach { (key, value) -> parameters.append(key, value) } }
-                timeout { requestTimeoutMillis = options.timeout ?: 10000 }
+             //   timeout { requestTimeoutMillis = options.timeout ?: 10000 }
 
-                requestBody?.let { setBody(serialize(it)) }
+                requestBody?.let {
+                    setBody(it)
+                }
             }
 
             val body = response.bodyAsText()
@@ -140,7 +144,6 @@ class NetworkManager(
         requestBody: T,
         params: Map<String, String> = emptyMap(),
         options: RequestOptions = RequestOptions(),
-        serialize: (T) -> String = { it.toString() },
         deserialize: (String) -> R
     ): NetworkResult<R> {
         return executeRequest(
@@ -149,7 +152,6 @@ class NetworkManager(
             requestBody = requestBody,
             params = params,
             options = options,
-            serialize = serialize,
             deserialize = deserialize
         )
     }
@@ -165,7 +167,6 @@ class NetworkManager(
             requestBody = Unit,
             params = params,
             options = options,
-            serialize = { "" },
             deserialize = { Unit }
         )
     }
@@ -176,7 +177,6 @@ class NetworkManager(
         requestBody: T,
         params: Map<String, String> = emptyMap(),
         options: RequestOptions = RequestOptions(),
-        serialize: (T) -> String = { it.toString() },
         deserialize: (String) -> R
     ): NetworkResult<R> {
         return executeRequest(
@@ -185,7 +185,6 @@ class NetworkManager(
             requestBody = requestBody,
             params = params,
             options = options,
-            serialize = serialize,
             deserialize = deserialize
         )
     }
@@ -201,7 +200,6 @@ class NetworkManager(
             requestBody = Unit,
             params = params,
             options = options,
-            serialize = { "" },
             deserialize = { Unit }
         )
     }
@@ -212,7 +210,6 @@ class NetworkManager(
         requestBody: T,
         params: Map<String, String> = emptyMap(),
         options: RequestOptions = RequestOptions(),
-        serialize: (T) -> String = { it.toString() },
         deserialize: (String) -> R
     ): NetworkResult<R> {
         return executeRequest(
@@ -221,7 +218,6 @@ class NetworkManager(
             requestBody = requestBody,
             params = params,
             options = options,
-            serialize = serialize,
             deserialize = deserialize
         )
     }
@@ -237,7 +233,6 @@ class NetworkManager(
             requestBody = Unit,
             params = params,
             options = options,
-            serialize = { "" },
             deserialize = { Unit }
         )
     }
@@ -279,7 +274,6 @@ class NetworkManager(
         requestBody: T,
         params: Map<String, String> = emptyMap(),
         options: RequestOptions = RequestOptions(),
-        serialize: (T) -> String = { it.toString() },
         deserialize: (String) -> R
     ): NetworkResult<R> {
         return executeRequest(
@@ -288,7 +282,6 @@ class NetworkManager(
             requestBody = requestBody,
             params = params,
             options = options,
-            serialize = serialize,
             deserialize = deserialize
         )
     }
@@ -308,10 +301,9 @@ class NetworkManager(
         requestBody: T,
         params: Map<String, String> = emptyMap(),
         options: RequestOptions = RequestOptions(),
-        noinline serialize: (T) -> String = { Json.encodeToString(it) },
         noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
     ): NetworkResult<R> {
-        return post(url, requestBody, params, options, serialize, deserialize)
+        return post(url, requestBody, params, options, deserialize)
     }
 
     suspend inline fun <reified T, reified R> putJson(
@@ -319,10 +311,9 @@ class NetworkManager(
         requestBody: T,
         params: Map<String, String> = emptyMap(),
         options: RequestOptions = RequestOptions(),
-        noinline serialize: (T) -> String = { Json.encodeToString(it) },
         noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
     ): NetworkResult<R> {
-        return put(url, requestBody, params, options, serialize, deserialize)
+        return put(url, requestBody, params, options, deserialize)
     }
 
     suspend inline fun <reified T, reified R> patchJson(
@@ -330,10 +321,9 @@ class NetworkManager(
         requestBody: T,
         params: Map<String, String> = emptyMap(),
         options: RequestOptions = RequestOptions(),
-        noinline serialize: (T) -> String = { Json.encodeToString(it) },
         noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
     ): NetworkResult<R> {
-        return patch(url, requestBody, params, options, serialize, deserialize)
+        return patch(url, requestBody, params, options, deserialize)
     }
 
     suspend inline fun <reified R> deleteJson(
