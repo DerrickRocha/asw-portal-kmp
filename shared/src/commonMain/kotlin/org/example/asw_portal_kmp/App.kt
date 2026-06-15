@@ -18,6 +18,7 @@ import org.jetbrains.compose.resources.painterResource
 
 import asw_portal_kmp.shared.generated.resources.Res
 import asw_portal_kmp.shared.generated.resources.compose_multiplatform
+import kotlinx.coroutines.coroutineScope
 
 @Composable
 @Preview
@@ -35,13 +36,20 @@ fun App() {
                 Text("Click me!")
             }
             AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
+                var text by remember { mutableStateOf("Loading") }
+                LaunchedEffect(true) {
+                    text = try {
+                        Greeting().greet()
+                    } catch (e: Exception) {
+                        e.message ?: "error"
+                    }
+                }
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+                    Text("Compose: $text")
                 }
             }
         }
