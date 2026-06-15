@@ -98,7 +98,7 @@ class NetworkManager(
                         }
                     }
                 }
-                //timeout { requestTimeoutMillis = options.timeout ?: 10000 }
+                timeout { requestTimeoutMillis = options.timeout ?: 10000 }
 
                 requestBody?.let {
                     val jsonString = serialize(it)
