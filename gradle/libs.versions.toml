@@ -41,9 +41,11 @@ kotlinx-coroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-te
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-client"}
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor-client"}
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor-client"}
-ktor-client-serialization = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor-client"}
+ktor-kotlin-serialization = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor-client"}
+ktor-client-serialization = { module = "io.ktor:ktor-client-serialization", version.ref = "ktor-client"}
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor-client"}
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor-client"}
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor-client" }
 
 dataStore-library = { module = "androidx.datastore:datastore", version.ref = "dataStore"}
 dataStore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStore"}

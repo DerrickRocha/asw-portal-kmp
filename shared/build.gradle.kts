@@ -55,6 +55,7 @@ kotlin {
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.cio)
             implementation(libs.ktor.client.serialization)
+            implementation(libs.ktor.kotlin.serialization)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.client.mock)
             implementation(libs.dataStore.library)
@@ -65,6 +66,9 @@ kotlin {
             implementation(libs.ktor.client.serialization)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.kotlinx.coroutinesTest)
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
     }
 }

@@ -7,20 +7,29 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
-import org.example.asw_portal_kmp.data.KeyValuePairManager
+import kotlinx.serialization.json.Json
 import org.example.asw_portal_kmp.data.KeyValuePairManagerImplementation
 import org.example.asw_portal_kmp.data.createDataStore
+import org.example.asw_portal_kmp.network.NetworkConfig
 import org.example.asw_portal_kmp.network.NetworkManager
-import org.example.asw_portal_kmp.network.RequestOptions
 
 class Greeting {
     private val platform = getPlatform()
+    private val networkConfig = NetworkConfig()
     private val client = HttpClient(){
         install(ContentNegotiation) {
-            json()
+            json(
+                Json {
+                    prettyPrint = true
+                    isLenient = true
+                    ignoreUnknownKeys = true
+                }
+            )
         }
         defaultRequest {
-            url("http://10.0.2.2:5100")
+            val baseUrl = networkConfig.getBaseUrl()
+            println("Base URL: $baseUrl")
+            url(baseUrl)
             contentType(ContentType.Application.Json)
         }
         expectSuccess = true
@@ -30,9 +39,9 @@ class Greeting {
     private val networkManager = NetworkManager(client, kvManager)
 
     @Serializable
-    private data class LoginResponse(val accessToken: String, val idToken: String, val refreshToken: String)
+    data class LoginResponse(val accessToken: String, val idToken: String, val refreshToken: String)
     @Serializable
-    private data class LoginRequest(val email: String, val password: String)
+    data class LoginRequest(val email: String, val password: String)
     suspend fun greet(): String {
         try {
             val response = networkManager.postJson<LoginRequest, LoginResponse>(
