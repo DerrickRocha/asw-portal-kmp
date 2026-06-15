@@ -18,8 +18,10 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecodingException
 import org.example.asw_portal_kmp.data.KeyValuePairManager
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -234,6 +236,7 @@ class NetworkManagerTest {
         val result = networkManager.post(
             url = "https://api.example.com/users",
             requestBody = request,
+            serialize = { json.encodeToString(it) },
             deserialize = { json.decodeFromString<TestUser>(it) }
         )
 
@@ -272,6 +275,7 @@ class NetworkManagerTest {
             url = "https://api.example.com/users",
             requestBody = request,
             options = RequestOptions(isAuthRequired = true),
+            serialize = { json.encodeToString(it) },
             deserialize = { json.decodeFromString<TestUser>(it) }
         )
 
@@ -289,6 +293,7 @@ class NetworkManagerTest {
         val result = networkManager.post(
             url = "https://api.example.com/users",
             requestBody = request,
+            serialize = { json.encodeToString(it) },
             deserialize = { json.decodeFromString<TestUser>(it) }
         )
 
@@ -312,6 +317,7 @@ class NetworkManagerTest {
             url = "https://api.example.com/users/1",
             options = RequestOptions(isAuthRequired = true),
             requestBody = request,
+            serialize = { json.encodeToString(it) },
             deserialize = { json.decodeFromString<TestUser>(it) }
         )
 
@@ -346,6 +352,7 @@ class NetworkManagerTest {
             url = "https://api.example.com/users/1",
             requestBody = request,
             options = RequestOptions(isAuthRequired = true),
+            serialize = { json.encodeToString(it) },
             deserialize = { json.decodeFromString<TestUser>(it) }
         )
 
@@ -365,6 +372,7 @@ class NetworkManagerTest {
         val result = networkManager.patch(
             url = "https://api.example.com/users/1",
             requestBody = partialUpdate,
+            serialize = { json.encodeToString(it) },
             deserialize = { json.decodeFromString<TestUser>(it) }
         )
 
@@ -400,6 +408,7 @@ class NetworkManagerTest {
             url = "https://api.example.com/users/1",
             requestBody = partialUpdate,
             options = RequestOptions(isTenantRequired = true, isAuthRequired = true),
+            serialize = { json.encodeToString(it) },
             deserialize = { json.decodeFromString<TestUser>(it) }
         )
 
@@ -448,6 +457,7 @@ class NetworkManagerTest {
         val result = networkManager.deleteWithBody(
             url = "https://api.example.com/users/1",
             requestBody = options,
+            serialize = { json.encodeToString(it) },
             deserialize = { Unit }
         )
 
@@ -573,6 +583,7 @@ class NetworkManagerTest {
 
     // MARK: - Error Handling Tests
 
+    @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testJsonParsingError() = runTest {
         // When
@@ -583,8 +594,8 @@ class NetworkManagerTest {
 
         // Then
         assertTrue(result is NetworkResult.Exception)
-        val exception = result as NetworkResult.Exception
-        assertTrue(exception.throwable is JsonParsingException)
+        val exception = result.throwable
+        assertTrue(exception is JsonDecodingException)
     }
 
     @Test
