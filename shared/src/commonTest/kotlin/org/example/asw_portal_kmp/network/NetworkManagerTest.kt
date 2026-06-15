@@ -595,7 +595,7 @@ class NetworkManagerTest {
         // Then
         assertTrue(result is NetworkResult.Exception)
         val exception = result.throwable
-        assertTrue(exception is JsonDecodingException)
+        assertTrue(exception is JsonParsingException)
     }
 
     @Test

@@ -11,7 +11,9 @@ import io.ktor.http.Headers
 import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import kotlinx.io.IOException
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecodingException
 import org.example.asw_portal_kmp.data.KeyValuePairManager
 
 class AuthenticationException(message: String) : IOException(message)
@@ -70,6 +72,7 @@ class NetworkManager(
     }
 
     // Generic request method to avoid code duplication
+    @OptIn(ExperimentalSerializationApi::class)
     private suspend fun <T, R> executeRequest(
         method: HttpMethod,
         url: String,
@@ -122,6 +125,7 @@ class NetworkManager(
         } catch (e: Exception) {
             when (e) {
                 is AuthenticationException, is TenantException -> NetworkResult.Error(e.message ?: "Auth error")
+                is JsonDecodingException -> NetworkResult.Exception(JsonParsingException(e.message ?: "JSON parsing error", e))
                 else -> NetworkResult.Exception(e)
             }
         }
