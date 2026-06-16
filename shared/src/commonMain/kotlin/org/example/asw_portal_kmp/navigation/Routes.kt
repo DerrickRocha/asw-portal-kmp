@@ -39,7 +39,6 @@ val navigationConfig: SavedStateConfiguration
     get() = SavedStateConfiguration {
         serializersModule = SerializersModule {
             polymorphic(NavKey::class) {
-                // Since Route is sealed, we can automatically register all subclasses
                 subclassesOfSealed<Route>()
             }
         }

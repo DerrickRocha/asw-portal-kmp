@@ -1,6 +1,5 @@
 package org.example.asw_portal_kmp
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,9 +34,7 @@ fun App() {
             NavDisplay(
                 backStack = backStack,
                 entryDecorators = listOf(
-                    // Saves Compose state per entry (like rememberSaveable)
                     rememberSaveableStateHolderNavEntryDecorator(),
-                    // Scopes ViewModel per entry - each screen gets its own ViewModel instance
                     rememberViewModelStoreNavEntryDecorator()
                 ),
                 entryProvider = { key ->
