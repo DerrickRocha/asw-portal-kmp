@@ -60,6 +60,9 @@ kotlin {
             implementation(libs.ktor.client.mock)
             implementation(libs.dataStore.library)
             implementation(libs.dataStore.preferences)
+            implementation(libs.jetbrains.navigation3.ui)
+            implementation(libs.jetbrains.material3.adaptiveNavigation3)
+            implementation(libs.jetbrains.lifecycle.viewmodelNavigation3)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

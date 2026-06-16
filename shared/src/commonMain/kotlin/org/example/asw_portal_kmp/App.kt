@@ -1,30 +1,30 @@
 package org.example.asw_portal_kmp
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.resources.painterResource
-
-import asw_portal_kmp.shared.generated.resources.Res
-import asw_portal_kmp.shared.generated.resources.compose_multiplatform
-import kotlinx.coroutines.coroutineScope
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import org.example.asw_portal_kmp.navigation.Route
+import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack
+import kotlin.collections.listOf
 
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
+        val backStack = rememberECommerceNavBackStack(Route.Login)
+
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.primaryContainer)
@@ -32,26 +32,21 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                var text by remember { mutableStateOf("Loading") }
-                LaunchedEffect(true) {
-                    text = try {
-                        Greeting().greet()
-                    } catch (e: Exception) {
-                        e.message ?: "error"
+            NavDisplay(
+                backStack = backStack,
+                entryDecorators = listOf(
+                    // Saves Compose state per entry (like rememberSaveable)
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    // Scopes ViewModel per entry - each screen gets its own ViewModel instance
+                    rememberViewModelStoreNavEntryDecorator()
+                ),
+                entryProvider = { key ->
+                    when(key) {
+                        Route.Login -> NavEntry(key = key, content = { Text("Login") })
+                        else -> NavEntry(key = key, content = { Text("Unknown") })
                     }
                 }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $text")
-                }
-            }
+            )
         }
     }
 }
