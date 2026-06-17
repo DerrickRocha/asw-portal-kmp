@@ -16,23 +16,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import org.example.asw_portal_kmp.ui.viewModels.LoginScreenState
+import org.example.asw_portal_kmp.ui.viewModels.LoginScreenViewModel
 
 @Composable
 fun LoginScreen() {
-
-
-    LoginScreenSection(LoginScreenState(), {}, {}, {})
+    val viewModel: LoginScreenViewModel = viewModel { LoginScreenViewModel() }
+    val state by viewModel.state.collectAsState()
+    LoginScreenSection(state,
+        viewModel::updateUsername,
+        viewModel::updatePassword,
+        viewModel::login
+    )
 }
-
-data class LoginScreenState(
-    val username: String = "",
-    val password: String = "",
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
 
 @Composable
 fun LoginScreenSection(
