@@ -19,6 +19,7 @@ import org.example.asw_portal_kmp.data.KeyValuePairManagerImplementation
 import org.example.asw_portal_kmp.data.createDataStore
 import org.example.asw_portal_kmp.navigation.Route
 import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack
+import org.example.asw_portal_kmp.ui.screens.LoginScreen
 import org.example.asw_portal_kmp.ui.viewModels.AppEffects
 import org.example.asw_portal_kmp.ui.viewModels.AppViewModel
 import kotlin.collections.listOf
@@ -71,7 +72,7 @@ fun App() {
                 entryProvider = { key ->
                     when(key) {
                         Route.Splash -> NavEntry(key = key, content = { Text("Splash") })
-                        Route.Login -> NavEntry(key = key, content = { Text("Login") })
+                        Route.Login -> NavEntry(key = key, content = { LoginScreen() })
                         Route.TenantSelection -> NavEntry(key = key, content = { Text("Tenant Selection") })
                         is Route.TenantConsole -> NavEntry(key = key, content = { Text("Tenant Console") })
                         else -> NavEntry(key = key, content = { Text("Unknown") })
