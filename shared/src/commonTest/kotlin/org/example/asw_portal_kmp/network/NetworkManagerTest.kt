@@ -128,7 +128,7 @@ class NetworkManagerTest {
     @Test
     fun testGetWithTenantRequired() = runTest {
         // Given
-        everySuspend { mockKeyValueManager.getTenantId() } returns "tenant-456"
+        everySuspend { mockKeyValueManager.getTenantId() } returns 123
 
         // When
         val result = networkManager.get<TestUser>(
@@ -180,7 +180,7 @@ class NetworkManagerTest {
     fun testGetWithBothAuthAndTenant() = runTest {
         // Given
         everySuspend { mockKeyValueManager.getIdToken() } returns "test-token"
-        everySuspend { mockKeyValueManager.getTenantId() } returns "test-tenant"
+        everySuspend { mockKeyValueManager.getTenantId() } returns 123
 
         // When
         val result = networkManager.get<TestUser>(
@@ -400,7 +400,7 @@ class NetworkManagerTest {
     fun testPatchWithTenantRequired() = runTest {
         // Given
         everySuspend { mockKeyValueManager.getIdToken() } returns "test-token"
-        everySuspend { mockKeyValueManager.getTenantId() } returns "test-tenant"
+        everySuspend { mockKeyValueManager.getTenantId() } returns 123
         val partialUpdate = mapOf("email" to "new@example.com")
 
         // When
@@ -469,7 +469,7 @@ class NetworkManagerTest {
     fun testDeleteWithAuthenticationAndTenant() = runTest {
         // Given
         everySuspend { mockKeyValueManager.getIdToken() } returns "test-token"
-        everySuspend { mockKeyValueManager.getTenantId() } returns "test-tenant"
+        everySuspend { mockKeyValueManager.getTenantId() } returns 123
 
         // When
         val result = networkManager.delete(

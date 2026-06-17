@@ -3,6 +3,7 @@ package org.example.asw_portal_kmp.data
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -13,9 +14,9 @@ interface KeyValuePairManager {
 
     val isLoggedIn: Flow<Boolean>
     suspend fun getIdToken(): String?
-    suspend fun getTenantId(): String?
+    suspend fun getTenantId(): Int?
     suspend fun saveIdToken(token: String)
-    suspend fun saveTenantId(tenantId: String)
+    suspend fun saveTenantId(tenantId: Int)
 }
 
 class KeyValuePairManagerImplementation(
@@ -25,7 +26,7 @@ class KeyValuePairManagerImplementation(
     companion object {
         // Preference keys
         private val KEY_ID_TOKEN = stringPreferencesKey("id_token")
-        private val KEY_TENANT_ID = stringPreferencesKey("tenant_id")
+        private val KEY_TENANT_ID = intPreferencesKey("tenant_id")
 
         // Header names
         private const val HEADER_AUTHORIZATION = "Authorization"
@@ -44,7 +45,7 @@ class KeyValuePairManagerImplementation(
         }.first()
     }
 
-    override suspend fun getTenantId(): String? {
+    override suspend fun getTenantId(): Int? {
         return store.data.map { preferences ->
             preferences[KEY_TENANT_ID]
         }.first()
@@ -56,7 +57,7 @@ class KeyValuePairManagerImplementation(
         }
     }
 
-    override suspend fun saveTenantId(tenantId: String) {
+    override suspend fun saveTenantId(tenantId: Int) {
         store.edit { preferences ->
             preferences[KEY_TENANT_ID] = tenantId
         }

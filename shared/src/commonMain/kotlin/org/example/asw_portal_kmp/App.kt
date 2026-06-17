@@ -19,6 +19,8 @@ import org.example.asw_portal_kmp.data.KeyValuePairManagerImplementation
 import org.example.asw_portal_kmp.data.createDataStore
 import org.example.asw_portal_kmp.navigation.Route
 import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack
+import org.example.asw_portal_kmp.ui.viewModels.AppEffects
+import org.example.asw_portal_kmp.ui.viewModels.AppViewModel
 import kotlin.collections.listOf
 
 private val store = createDataStore()

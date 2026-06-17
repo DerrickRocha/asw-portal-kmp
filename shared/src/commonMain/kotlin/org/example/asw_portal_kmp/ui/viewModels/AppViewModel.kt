@@ -1,4 +1,4 @@
-package org.example.asw_portal_kmp
+package org.example.asw_portal_kmp.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,8 +18,8 @@ class AppViewModel(private val keyValuePairManager: KeyValuePairManager) : ViewM
             keyValuePairManager.isLoggedIn.collect { isLoggedIn ->
                 if (isLoggedIn) {
                     val tenantId = keyValuePairManager.getTenantId()
-                    if (!tenantId.isNullOrBlank()) {
-                        _effects.emit(AppEffects.NavigateToTenantConsole(tenantId.toInt()))
+                    if (tenantId != null && tenantId > 0) {
+                        _effects.emit(AppEffects.NavigateToTenantConsole(tenantId))
                     } else {
                         _effects.emit(AppEffects.NavigateToTenantSelection)
                     }

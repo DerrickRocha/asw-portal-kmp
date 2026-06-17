@@ -65,7 +65,7 @@ class NetworkManager(
         if (isTenantRequired) {
             val tenantId = manager.getTenantId()
                 ?: throw TenantException("Tenant ID required but no tenant ID found in DataStore")
-            headers[HEADER_TENANT_ID] = tenantId
+            headers[HEADER_TENANT_ID] = tenantId.toString()
         }
 
         return headers
