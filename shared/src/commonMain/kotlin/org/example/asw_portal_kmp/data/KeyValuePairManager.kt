@@ -4,11 +4,14 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 
 interface KeyValuePairManager {
+
+    val isLoggedIn: Flow<Boolean>
     suspend fun getIdToken(): String?
     suspend fun getTenantId(): String?
     suspend fun saveIdToken(token: String)
@@ -29,6 +32,11 @@ class KeyValuePairManagerImplementation(
         private const val HEADER_TENANT_ID = "X-Tenant-Id"
         private const val TOKEN_PREFIX = "Bearer "
     }
+
+    override val isLoggedIn: Flow<Boolean>
+        get() = store.data.map { preferences ->
+            preferences[KEY_ID_TOKEN].isNullOrBlank().not()
+        }
 
     override suspend fun getIdToken(): String? {
         return store.data.map { preferences ->
