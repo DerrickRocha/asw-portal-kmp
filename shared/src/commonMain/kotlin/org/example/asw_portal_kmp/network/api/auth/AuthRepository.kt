@@ -26,12 +26,13 @@ class AuthRepositoryImpl(
         )
         return when (response) {
             is NetworkResult.Error -> {
-                LoginResult.Failure(response.message)
+                LoginResult.Failure("Login failed: ${response.statusCode}")
             }
             is NetworkResult.Exception -> {
-                LoginResult.Failure(response.throwable.message ?: "Unknown error")
+                LoginResult.Failure("Login failed. Please try again later.")
             }
             is NetworkResult.Success<LoginResponse> -> {
+                keyValuePairManager.saveIdToken(response.data.idToken)
                 LoginResult.Success
             }
         }

@@ -22,48 +22,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
-import org.example.asw_portal_kmp.data.KeyValuePairManagerImplementation
-import org.example.asw_portal_kmp.data.createDataStore
-import org.example.asw_portal_kmp.getPlatform
-import org.example.asw_portal_kmp.network.NetworkConfig
-import org.example.asw_portal_kmp.network.NetworkManager
-import org.example.asw_portal_kmp.network.api.auth.AuthRepository
-import org.example.asw_portal_kmp.network.api.auth.AuthRepositoryImpl
+import org.example.asw_portal_kmp.Dependencies.authRepository
 import org.example.asw_portal_kmp.ui.viewModels.LoginScreenState
 import org.example.asw_portal_kmp.ui.viewModels.LoginScreenViewModel
 
-private val platform = getPlatform()
-private val networkConfig = NetworkConfig()
-private val client = HttpClient(){
-    install(ContentNegotiation) {
-        json(
-            Json {
-                ignoreUnknownKeys = true
-            }
-        )
-    }
-    defaultRequest {
-        val baseUrl = networkConfig.getBaseUrl()
-        println("Base URL: $baseUrl")
-        url(baseUrl)
-        contentType(ContentType.Application.Json)
-    }
-    expectSuccess = true
-}
-val store = createDataStore()
-private val kvManager = KeyValuePairManagerImplementation(store)
-private val networkManager = NetworkManager(client, kvManager)
-private val api: AuthRepository = AuthRepositoryImpl(networkManager, kvManager)
 @Composable
 fun LoginScreen() {
-    val viewModel: LoginScreenViewModel = viewModel { LoginScreenViewModel(api) }
+    val viewModel: LoginScreenViewModel = viewModel { LoginScreenViewModel(authRepository) }
     val state by viewModel.state.collectAsState()
     LoginScreenSection(state,
         viewModel::updateUsername,

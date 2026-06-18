@@ -28,7 +28,9 @@ class LoginScreenViewModel(private val repository: AuthRepository) : ViewModel()
             try {
                 when (val result = repository.login(state.value.username, state.value.password)) {
                     is LoginResult.Failure -> _state.value = _state.value.copy(isLoading = false, error = result.error)
-                    LoginResult.Success -> _state.value = _state.value.copy(isLoading = false)
+                    LoginResult.Success -> {
+                        _state.value = _state.value.copy(isLoading = false)
+                    }
                 }
 
             } catch (e: Exception) {
