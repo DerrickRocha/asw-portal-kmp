@@ -1,8 +1,11 @@
 package org.example.asw_portal_kmp.network.api.auth
 
 import org.example.asw_portal_kmp.data.KeyValuePairManager
+import org.example.asw_portal_kmp.network.AuthenticationException
+import org.example.asw_portal_kmp.network.JsonParsingException
 import org.example.asw_portal_kmp.network.NetworkManager
 import org.example.asw_portal_kmp.network.NetworkResult
+import org.example.asw_portal_kmp.network.TenantException
 import org.example.asw_portal_kmp.network.requests.LoginRequest
 import org.example.asw_portal_kmp.network.responses.LoginResponse
 
@@ -26,10 +29,23 @@ class AuthRepositoryImpl(
         )
         return when (response) {
             is NetworkResult.Error -> {
-                LoginResult.Failure("Login failed: ${response.statusCode}")
+                val message = when (response.statusCode) {
+                    401 -> "Invalid username or password"
+                    403 -> "Account locked. Please contact support."
+                    404 -> "Service unavailable. Please try again later."
+                    else -> "Login failed (${response.statusCode})"
+                }
+                LoginResult.Failure(message)
             }
             is NetworkResult.Exception -> {
-                LoginResult.Failure("Login failed. Please try again later.")
+                val message = when (val e = response.throwable) {
+                    is JsonParsingException -> "Server response format error. Please contact support."
+                    is AuthenticationException -> "Authentication error. Please try again."
+                    is TenantException -> "Tenant configuration error. Please contact support."
+                    is kotlinx.coroutines.TimeoutCancellationException -> "Request timed out. Please try again."
+                    else -> "Login failed. Please try again later."
+                }
+                LoginResult.Failure(message)
             }
             is NetworkResult.Success<LoginResponse> -> {
                 keyValuePairManager.saveIdToken(response.data.idToken)
