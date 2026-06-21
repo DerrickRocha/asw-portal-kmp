@@ -23,6 +23,11 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonDecodingException
 import org.example.asw_portal_kmp.data.KeyValuePairManager
+import org.example.asw_portal_kmp.network.deleteJson
+import org.example.asw_portal_kmp.network.getJson
+import org.example.asw_portal_kmp.network.patchJson
+import org.example.asw_portal_kmp.network.postJson
+import org.example.asw_portal_kmp.network.putJson
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -73,7 +78,7 @@ class NetworkManagerTest {
             }
         }
 
-        networkManager = NetworkManager(client, mockKeyValueManager)
+        networkManager = NetworkManagerImplementation(client, mockKeyValueManager)
     }
 
     // MARK: - GET Tests
