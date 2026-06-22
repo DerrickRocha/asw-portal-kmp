@@ -2,6 +2,8 @@ package org.example.asw_portal_kmp.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.ktor.utils.io.ioDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +13,10 @@ import org.example.asw_portal_kmp.Dependencies
 import org.example.asw_portal_kmp.network.api.auth.AuthRepository
 import org.example.asw_portal_kmp.network.api.auth.LoginResult
 
-class LoginScreenViewModel(private val repository: AuthRepository = Dependencies.authRepository) : ViewModel() {
+class LoginScreenViewModel(
+    private val repository: AuthRepository = Dependencies.authRepository,
+    private val dispatcher: CoroutineDispatcher = ioDispatcher()
+) : ViewModel() {
 
     private var loginJob: Job? = null
     private val _state = MutableStateFlow(LoginScreenState())
@@ -27,7 +32,7 @@ class LoginScreenViewModel(private val repository: AuthRepository = Dependencies
 
     fun login() {
         loginJob?.cancel()
-        loginJob = viewModelScope.launch {
+        loginJob = viewModelScope.launch(dispatcher) {
             val currentState = _state.value
 
             if (currentState.username.isBlank() || currentState.password.isBlank()) {
