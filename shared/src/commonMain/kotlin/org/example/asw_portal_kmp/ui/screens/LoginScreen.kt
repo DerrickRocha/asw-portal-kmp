@@ -1,5 +1,6 @@
 package org.example.asw_portal_kmp.ui.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -47,14 +49,15 @@ import org.example.asw_portal_kmp.ui.viewModels.LoginScreenState
 import org.example.asw_portal_kmp.ui.viewModels.LoginScreenViewModel
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(onNavigateToSignUp: () -> Unit) {
     val viewModel: LoginScreenViewModel = viewModel { LoginScreenViewModel() }
     val state by viewModel.state.collectAsState()
     LoginScreenSection(
         state,
         viewModel::updateUsername,
         viewModel::updatePassword,
-        viewModel::login
+        viewModel::login,
+        onNavigateToSignUp
     )
 }
 
@@ -63,7 +66,8 @@ fun LoginScreenSection(
     state: LoginScreenState,
     onUpdateUserName: (String) -> Unit,
     onUpdatePassword: (String) -> Unit,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    onSignUpClick: () -> Unit
 ) {
 
     val focusRequester = remember { FocusRequester() }
@@ -156,6 +160,15 @@ fun LoginScreenSection(
                     )
                 }
 
+                if (state.isSuccess) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "✓ Login successful!",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
@@ -182,14 +195,33 @@ fun LoginScreenSection(
                     }
                 }
 
-                if (state.isSuccess) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = "✓ Login successful!",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodyMedium
+                        text = "Don't have an account?",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    TextButton(
+                        onClick = onSignUpClick,
+                        enabled = !state.isLoading,
+                        modifier = Modifier.semantics {
+                            contentDescription = "Sign up button"
+                        }
+                    ) {
+                        Text(
+                            text = "Sign Up",
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
                 }
+
             }
         }
     }

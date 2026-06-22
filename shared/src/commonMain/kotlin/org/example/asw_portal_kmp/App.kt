@@ -21,6 +21,7 @@ import org.example.asw_portal_kmp.data.createDataStore
 import org.example.asw_portal_kmp.navigation.Route
 import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack
 import org.example.asw_portal_kmp.ui.screens.LoginScreen
+import org.example.asw_portal_kmp.ui.screens.SignupScreen
 import org.example.asw_portal_kmp.ui.viewModels.AppEffects
 import org.example.asw_portal_kmp.ui.viewModels.AppViewModel
 import kotlin.collections.listOf
@@ -43,10 +44,12 @@ fun App() {
                         backStack.clear()
                         backStack.add(Route.Login)
                     }
+
                     is AppEffects.NavigateToTenantConsole -> {
                         backStack.clear()
                         backStack.add(Route.TenantConsole(effect.tenantId))
                     }
+
                     AppEffects.NavigateToTenantSelection -> {
                         backStack.clear()
                         backStack.add(Route.TenantSelection)
@@ -69,9 +72,16 @@ fun App() {
                     rememberViewModelStoreNavEntryDecorator()
                 ),
                 entryProvider = { key ->
-                    when(key) {
+                    when (key) {
                         Route.Splash -> NavEntry(key = key, content = { Text("Splash") })
-                        Route.Login -> NavEntry(key = key, content = { LoginScreen() })
+                        Route.Login -> NavEntry(
+                            key = key,
+                            content = { LoginScreen(onNavigateToSignUp = { backStack.add(Route.Signup) }) })
+
+                        Route.Signup -> NavEntry(
+                            key = key,
+                            content = { SignupScreen({}, onvNavigateToLogin = { backStack.add(Route.Login) }) })
+
                         Route.TenantSelection -> NavEntry(key = key, content = { Text("Tenant Selection") })
                         is Route.TenantConsole -> NavEntry(key = key, content = { Text("Tenant Console") })
                         else -> NavEntry(key = key, content = { Text("Unknown") })
