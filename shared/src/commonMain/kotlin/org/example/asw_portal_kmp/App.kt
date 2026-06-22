@@ -76,11 +76,17 @@ fun App() {
                         Route.Splash -> NavEntry(key = key, content = { Text("Splash") })
                         Route.Login -> NavEntry(
                             key = key,
-                            content = { LoginScreen(onNavigateToSignUp = { backStack.add(Route.Signup) }) })
+                            content = { LoginScreen(onNavigateToSignUp = {
+                                backStack.clear()
+                                backStack.add(Route.Signup)
+                            }) })
 
                         Route.Signup -> NavEntry(
                             key = key,
-                            content = { SignupScreen({}, onvNavigateToLogin = { backStack.add(Route.Login) }) })
+                            content = { SignupScreen({}, onNavigateToLogin = {
+                                backStack.clear()
+                                backStack.add(Route.Login)
+                            }) })
 
                         Route.TenantSelection -> NavEntry(key = key, content = { Text("Tenant Selection") })
                         is Route.TenantConsole -> NavEntry(key = key, content = { Text("Tenant Console") })

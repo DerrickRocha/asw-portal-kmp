@@ -46,43 +46,60 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.example.asw_portal_kmp.ui.viewModels.SignupEvent
 import org.example.asw_portal_kmp.ui.viewModels.SignupScreenState
 import org.example.asw_portal_kmp.ui.viewModels.SignupViewModel
 
 @Composable
 fun SignupScreen(
     onNavigateToTenantConsole: (Int) -> Unit,
-    onvNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit
 ) {
-
     val viewModel: SignupViewModel = viewModel { SignupViewModel() }
     val state by viewModel.state.collectAsState()
 
+    // Handle navigation events
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is SignupEvent.NavigateToTenantConsole -> {
+                    onNavigateToTenantConsole(event.tenantId)
+                }
+                SignupEvent.NavigateToLogin -> {
+                    onNavigateToLogin()
+                }
+            }
+        }
+    }
+
     SignupScreenSection(
-        state, {}, {}, {}, {}, {}, {},
-        { viewModel.onSignup() },
-        onvNavigateToLogin
+        state = state,
+        onUpdateEmail = viewModel::updateEmail,
+        onUpdatePassword = viewModel::updatePassword,
+        onUpdateConfirmPassword = viewModel::updateConfirmPassword,
+        onUpdateSubdomain = viewModel::updateSubdomain,
+        onUpdateCustomDomain = viewModel::updateCustomDomain,
+        onSignUpClick = viewModel::signUp,
+        onNavigateToLogin = onNavigateToLogin
     )
 }
 
 @Composable
 fun SignupScreenSection(
     state: SignupScreenState,
-    onUpdateFirstName: (String) -> Unit,
-    onUpdateLastName: (String) -> Unit,
     onUpdateEmail: (String) -> Unit,
     onUpdatePassword: (String) -> Unit,
     onUpdateConfirmPassword: (String) -> Unit,
-    onUpdateCompanyName: (String) -> Unit,
+    onUpdateSubdomain: (String) -> Unit,
+    onUpdateCustomDomain: (String) -> Unit,
     onSignUpClick: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
-    val lastNameFocusRequester = remember { FocusRequester() }
-    val emailFocusRequester = remember { FocusRequester() }
     val passwordFocusRequester = remember { FocusRequester() }
     val confirmPasswordFocusRequester = remember { FocusRequester() }
-    val companyNameFocusRequester = remember { FocusRequester() }
+    val subdomainFocusRequester = remember { FocusRequester() }
+    val customDomainFocusRequester = remember { FocusRequester() }
 
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
@@ -107,7 +124,7 @@ fun SignupScreenSection(
         ) {
             // Header
             Text(
-                text = "Create Account",
+                text = "Create Your Account",
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(top = 32.dp, bottom = 8.dp)
             )
@@ -119,72 +136,6 @@ fun SignupScreenSection(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            // First Name Field
-            OutlinedTextField(
-                value = state.firstName,
-                onValueChange = onUpdateFirstName,
-                label = { Text("First Name") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(
-                    onNext = { lastNameFocusRequester.requestFocus() }
-                ),
-                enabled = !state.isLoading,
-                singleLine = true,
-                isError = state.firstNameError != null
-            )
-
-            if (state.firstNameError != null) {
-                Text(
-                    text = state.firstNameError!!,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, top = 4.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Last Name Field
-            OutlinedTextField(
-                value = state.lastName,
-                onValueChange = onUpdateLastName,
-                label = { Text("Last Name") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(lastNameFocusRequester),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(
-                    onNext = { emailFocusRequester.requestFocus() }
-                ),
-                enabled = !state.isLoading,
-                singleLine = true,
-                isError = state.lastNameError != null
-            )
-
-            if (state.lastNameError != null) {
-                Text(
-                    text = state.lastNameError!!,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, top = 4.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
             // Email Field
             OutlinedTextField(
                 value = state.email,
@@ -192,7 +143,7 @@ fun SignupScreenSection(
                 label = { Text("Email") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(emailFocusRequester),
+                    .focusRequester(focusRequester),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
@@ -277,7 +228,7 @@ fun SignupScreenSection(
                     imeAction = ImeAction.Next
                 ),
                 keyboardActions = KeyboardActions(
-                    onNext = { companyNameFocusRequester.requestFocus() }
+                    onNext = { subdomainFocusRequester.requestFocus() }
                 ),
                 visualTransformation = if (confirmPasswordVisible)
                     VisualTransformation.None
@@ -310,14 +261,57 @@ fun SignupScreenSection(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Company Name Field (Optional)
+            // Subdomain Field
             OutlinedTextField(
-                value = state.companyName,
-                onValueChange = onUpdateCompanyName,
-                label = { Text("Company Name (Optional)") },
+                value = state.subdomain,
+                onValueChange = onUpdateSubdomain,
+                label = { Text("Subdomain") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(companyNameFocusRequester),
+                    .focusRequester(subdomainFocusRequester),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { customDomainFocusRequester.requestFocus() }
+                ),
+                enabled = !state.isLoading,
+                singleLine = true,
+                isError = state.subdomainError != null,
+                trailingIcon = {
+                    if (state.subdomain.isNotBlank()) {
+                        Text(
+                            text = ".yourapp.com",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(end = 16.dp)
+                        )
+                    }
+                }
+            )
+
+            if (state.subdomainError != null) {
+                Text(
+                    text = state.subdomainError!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, top = 4.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Custom Domain Field (Optional)
+            OutlinedTextField(
+                value = state.customDomain,
+                onValueChange = onUpdateCustomDomain,
+                label = { Text("Custom Domain (Optional)") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(customDomainFocusRequester),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Done
@@ -327,12 +321,13 @@ fun SignupScreenSection(
                 ),
                 enabled = !state.isLoading,
                 singleLine = true,
-                isError = state.companyNameError != null
+                isError = state.customDomainError != null,
+                placeholder = { Text("e.g., portal.yourcompany.com") }
             )
 
-            if (state.companyNameError != null) {
+            if (state.customDomainError != null) {
                 Text(
-                    text = state.companyNameError!!,
+                    text = state.customDomainError!!,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier
