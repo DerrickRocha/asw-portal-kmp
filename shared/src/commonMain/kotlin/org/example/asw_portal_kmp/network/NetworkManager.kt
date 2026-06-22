@@ -16,6 +16,135 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonDecodingException
 import org.example.asw_portal_kmp.data.KeyValuePairManager
 
+interface NetworkManager {
+    suspend fun <T> get(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        deserialize: (String) -> T
+    ): NetworkResult<T>
+    suspend fun <T, R> post(
+        url: String,
+        requestBody: T,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        serialize: (T) -> String,
+        deserialize: (String) -> R
+    ): NetworkResult<R>
+
+    suspend fun post(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions()
+    ): NetworkResult<Unit>
+
+    suspend fun <T, R> put(
+        url: String,
+        requestBody: T,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        serialize: (T) -> String,
+        deserialize: (String) -> R
+    ): NetworkResult<R>
+
+    suspend fun put(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions()
+    ): NetworkResult<Unit>
+
+    suspend fun <T, R> patch(
+        url: String,
+        requestBody: T,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        serialize: (T) -> String,
+        deserialize: (String) -> R
+    ): NetworkResult<R>
+
+    suspend fun patch(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions()
+    ): NetworkResult<Unit>
+
+    suspend fun <R> delete(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        deserialize: (String) -> R
+    ): NetworkResult<R>
+
+    suspend fun delete(
+        url: String,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions()
+    ): NetworkResult<Unit>
+
+    suspend fun <T, R> deleteWithBody(
+        url: String,
+        requestBody: T,
+        params: Map<String, String> = emptyMap(),
+        options: RequestOptions = RequestOptions(),
+        serialize: (T) -> String,
+        deserialize: (String) -> R
+    ): NetworkResult<R>
+
+}
+
+suspend inline fun <reified R> NetworkManager.deleteJson(
+    url: String,
+    params: Map<String, String> = emptyMap(),
+    options: RequestOptions = RequestOptions(),
+    noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
+): NetworkResult<R> {
+    return delete(url, params, options, deserialize)
+}
+
+suspend inline fun <reified T, reified R> NetworkManager.patchJson(
+    url: String,
+    requestBody: T,
+    params: Map<String, String> = emptyMap(),
+    options: RequestOptions = RequestOptions(),
+    noinline serialize: (T) -> String = { Json.encodeToString(it) },
+    noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
+): NetworkResult<R> {
+    return patch(url, requestBody, params, options, serialize, deserialize)
+}
+
+suspend inline fun <reified T, reified R> NetworkManager.putJson(
+    url: String,
+    requestBody: T,
+    params: Map<String, String> = emptyMap(),
+    options: RequestOptions = RequestOptions(),
+    noinline serialize: (T) -> String = { Json.encodeToString(it) },
+    noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
+): NetworkResult<R> {
+    return put(url, requestBody, params, options, serialize, deserialize)
+}
+
+suspend inline fun <reified T, reified R> NetworkManager.postJson(
+    url: String,
+    requestBody: T,
+    params: Map<String, String> = emptyMap(),
+    options: RequestOptions = RequestOptions(),
+    noinline serialize: (T) -> String = { Json.encodeToString(it) },
+    noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
+): NetworkResult<R> {
+    return post(url, requestBody, params, options, serialize, deserialize)
+}
+
+suspend inline fun <reified T, reified R> NetworkManager.getJson(
+    url: String,
+    params: Map<String, String> = emptyMap(),
+    options: RequestOptions = RequestOptions(),
+    noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
+): NetworkResult<R> {
+    return get(url, params, options, deserialize)
+}
+
+
+
 class AuthenticationException(message: String) : IOException(message)
 class TenantException(message: String) : IOException(message)
 class JsonParsingException(message: String, cause: Throwable) : IOException(message, cause)
@@ -39,10 +168,10 @@ data class RequestOptions(
     val timeout: Long? = 10000
 )
 
-class NetworkManager(
+class NetworkManagerImplementation(
     private val client: HttpClient,
     private val manager: KeyValuePairManager
-) {
+): NetworkManager {
 
     companion object {
         private const val HEADER_AUTHORIZATION = "Authorization"
@@ -65,7 +194,7 @@ class NetworkManager(
         if (isTenantRequired) {
             val tenantId = manager.getTenantId()
                 ?: throw TenantException("Tenant ID required but no tenant ID found in DataStore")
-            headers[HEADER_TENANT_ID] = tenantId
+            headers[HEADER_TENANT_ID] = tenantId.toString()
         }
 
         return headers
@@ -132,10 +261,10 @@ class NetworkManager(
     }
 
     // GET method
-    suspend fun <T> get(
+    override suspend fun <T> get(
         url: String,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions(),
+        params: Map<String, String>,
+        options: RequestOptions,
         deserialize: (String) -> T
     ): NetworkResult<T> {
         return executeRequest(
@@ -150,11 +279,11 @@ class NetworkManager(
     }
 
     // POST method
-    suspend fun <T, R> post(
+    override suspend fun <T, R> post(
         url: String,
         requestBody: T,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions(),
+        params: Map<String, String>,
+        options: RequestOptions,
         serialize: (T) -> String,
         deserialize: (String) -> R
     ): NetworkResult<R> {
@@ -170,10 +299,10 @@ class NetworkManager(
     }
 
     // POST without response body
-    suspend fun post(
+    override suspend fun post(
         url: String,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions()
+        params: Map<String, String>,
+        options: RequestOptions
     ): NetworkResult<Unit> {
         return post(
             url = url,
@@ -186,11 +315,11 @@ class NetworkManager(
     }
 
     // PUT method
-    suspend fun <T, R> put(
+    override suspend fun <T, R> put(
         url: String,
         requestBody: T,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions(),
+        params: Map<String, String>,
+        options: RequestOptions,
         serialize: (T) -> String,
         deserialize: (String) -> R
     ): NetworkResult<R> {
@@ -206,10 +335,10 @@ class NetworkManager(
     }
 
     // PUT without response body
-    suspend fun put(
+    override suspend fun put(
         url: String,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions()
+        params: Map<String, String>,
+        options: RequestOptions
     ): NetworkResult<Unit> {
         return put(
             url = url,
@@ -222,11 +351,11 @@ class NetworkManager(
     }
 
     // PATCH method
-    suspend fun <T, R> patch(
+    override suspend fun <T, R> patch(
         url: String,
         requestBody: T,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions(),
+        params: Map<String, String>,
+        options: RequestOptions,
         serialize: (T) -> String,
         deserialize: (String) -> R
     ): NetworkResult<R> {
@@ -242,10 +371,10 @@ class NetworkManager(
     }
 
     // PATCH without response body
-    suspend fun patch(
+    override suspend fun patch(
         url: String,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions()
+        params: Map<String, String>,
+        options: RequestOptions
     ): NetworkResult<Unit> {
         return patch(
             url = url,
@@ -258,10 +387,10 @@ class NetworkManager(
     }
 
     // DELETE method (typically no request body)
-    suspend fun <R> delete(
+    override suspend fun <R> delete(
         url: String,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions(),
+        params: Map<String, String>,
+        options: RequestOptions,
         deserialize: (String) -> R
     ): NetworkResult<R> {
         return executeRequest(
@@ -276,10 +405,10 @@ class NetworkManager(
     }
 
     // DELETE without response body
-    suspend fun delete(
+    override suspend fun delete(
         url: String,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions()
+        params: Map<String, String>,
+        options: RequestOptions
     ): NetworkResult<Unit> {
         return delete(
             url = url,
@@ -289,12 +418,11 @@ class NetworkManager(
         )
     }
 
-    // DELETE with request body (less common but sometimes needed)
-    suspend fun <T, R> deleteWithBody(
+    override suspend fun <T, R> deleteWithBody(
         url: String,
         requestBody: T,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions(),
+        params: Map<String, String>,
+        options: RequestOptions,
         serialize: (T) -> String,
         deserialize: (String) -> R
     ): NetworkResult<R> {
@@ -307,57 +435,5 @@ class NetworkManager(
             serialize = serialize,
             deserialize = deserialize
         )
-    }
-
-    // Convenience methods with JSON serialization (using kotlinx.serialization)
-    suspend inline fun <reified T, reified R> getJson(
-        url: String,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions(),
-        noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
-    ): NetworkResult<R> {
-        return get(url, params, options, deserialize)
-    }
-
-    suspend inline fun <reified T, reified R> postJson(
-        url: String,
-        requestBody: T,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions(),
-        noinline serialize: (T) -> String = { Json.encodeToString(it) },
-        noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
-    ): NetworkResult<R> {
-        return post(url, requestBody, params, options, serialize, deserialize)
-    }
-
-    suspend inline fun <reified T, reified R> putJson(
-        url: String,
-        requestBody: T,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions(),
-        noinline serialize: (T) -> String = { Json.encodeToString(it) },
-        noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
-    ): NetworkResult<R> {
-        return put(url, requestBody, params, options, serialize, deserialize)
-    }
-
-    suspend inline fun <reified T, reified R> patchJson(
-        url: String,
-        requestBody: T,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions(),
-        noinline serialize: (T) -> String = { Json.encodeToString(it) },
-        noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
-    ): NetworkResult<R> {
-        return patch(url, requestBody, params, options, serialize, deserialize)
-    }
-
-    suspend inline fun <reified R> deleteJson(
-        url: String,
-        params: Map<String, String> = emptyMap(),
-        options: RequestOptions = RequestOptions(),
-        noinline deserialize: (String) -> R = { Json.decodeFromString<R>(it) }
-    ): NetworkResult<R> {
-        return delete(url, params, options, deserialize)
     }
 }

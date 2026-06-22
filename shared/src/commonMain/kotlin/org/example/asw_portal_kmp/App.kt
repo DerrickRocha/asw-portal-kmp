@@ -10,19 +10,50 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import org.example.asw_portal_kmp.Dependencies.kvManager
+import org.example.asw_portal_kmp.data.KeyValuePairManagerImplementation
+import org.example.asw_portal_kmp.data.createDataStore
 import org.example.asw_portal_kmp.navigation.Route
 import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack
+import org.example.asw_portal_kmp.ui.screens.LoginScreen
+import org.example.asw_portal_kmp.ui.viewModels.AppEffects
+import org.example.asw_portal_kmp.ui.viewModels.AppViewModel
 import kotlin.collections.listOf
+
 
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
-        val backStack = rememberECommerceNavBackStack(Route.Login)
+        val viewModel: AppViewModel = viewModel {
+
+            AppViewModel(keyValuePairManager = kvManager)
+        }
+        val backStack = rememberECommerceNavBackStack(Route.Splash)
+
+        LaunchedEffect(Unit) {
+            viewModel.effects.collect { effect ->
+                when (effect) {
+                    is AppEffects.NavigateToLogin -> {
+                        backStack.clear()
+                        backStack.add(Route.Login)
+                    }
+                    is AppEffects.NavigateToTenantConsole -> {
+                        backStack.clear()
+                        backStack.add(Route.TenantConsole(effect.tenantId))
+                    }
+                    AppEffects.NavigateToTenantSelection -> {
+                        backStack.clear()
+                        backStack.add(Route.TenantSelection)
+                    }
+                }
+            }
+        }
 
         Column(
             modifier = Modifier
@@ -39,7 +70,10 @@ fun App() {
                 ),
                 entryProvider = { key ->
                     when(key) {
-                        Route.Login -> NavEntry(key = key, content = { Text("Login") })
+                        Route.Splash -> NavEntry(key = key, content = { Text("Splash") })
+                        Route.Login -> NavEntry(key = key, content = { LoginScreen() })
+                        Route.TenantSelection -> NavEntry(key = key, content = { Text("Tenant Selection") })
+                        is Route.TenantConsole -> NavEntry(key = key, content = { Text("Tenant Console") })
                         else -> NavEntry(key = key, content = { Text("Unknown") })
                     }
                 }

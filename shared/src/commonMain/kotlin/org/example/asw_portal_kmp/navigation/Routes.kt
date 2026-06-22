@@ -14,6 +14,9 @@ import kotlinx.serialization.modules.polymorphic
 sealed interface Route: NavKey {
 
     @Serializable
+    data object Splash: Route
+
+    @Serializable
     data object Login: Route
 
     @Serializable

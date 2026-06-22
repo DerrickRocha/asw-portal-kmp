@@ -6,15 +6,16 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.example.asw_portal_kmp.data.KeyValuePairManagerImplementation
 import org.example.asw_portal_kmp.data.createDataStore
 import org.example.asw_portal_kmp.network.NetworkConfig
 import org.example.asw_portal_kmp.network.NetworkManager
+import org.example.asw_portal_kmp.network.NetworkManagerImplementation
+import org.example.asw_portal_kmp.network.api.auth.AuthRepositoryImpl
 
-class Greeting {
-    private val platform = getPlatform()
+object Dependencies {
+
     private val networkConfig = NetworkConfig()
     private val client = HttpClient(){
         install(ContentNegotiation) {
@@ -32,25 +33,10 @@ class Greeting {
         }
         expectSuccess = true
     }
-    val store = createDataStore()
-    private val kvManager = KeyValuePairManagerImplementation(store)
-    private val networkManager = NetworkManager(client, kvManager)
+    private val store = createDataStore()
+    val kvManager = KeyValuePairManagerImplementation(store)
+    private val networkManager = NetworkManagerImplementation(client, kvManager)
 
-    @Serializable
-    data class LoginResponse(val accessToken: String, val idToken: String, val refreshToken: String)
-    @Serializable
-    data class LoginRequest(val email: String, val password: String)
-    suspend fun greet(): String {
-        try {
-            val response = networkManager.postJson<LoginRequest, LoginResponse>(
-                "/auth/login",
-                LoginRequest("drocha616@gmail.com", "JonSnow_666"),
-            )
-            println(response)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    val authRepository = AuthRepositoryImpl(networkManager, kvManager)
 
-        return sayHello(platform.name)
-    }
 }

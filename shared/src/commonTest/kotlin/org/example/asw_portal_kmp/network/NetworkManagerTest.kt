@@ -23,6 +23,11 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonDecodingException
 import org.example.asw_portal_kmp.data.KeyValuePairManager
+import org.example.asw_portal_kmp.network.deleteJson
+import org.example.asw_portal_kmp.network.getJson
+import org.example.asw_portal_kmp.network.patchJson
+import org.example.asw_portal_kmp.network.postJson
+import org.example.asw_portal_kmp.network.putJson
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -73,7 +78,7 @@ class NetworkManagerTest {
             }
         }
 
-        networkManager = NetworkManager(client, mockKeyValueManager)
+        networkManager = NetworkManagerImplementation(client, mockKeyValueManager)
     }
 
     // MARK: - GET Tests
@@ -128,7 +133,7 @@ class NetworkManagerTest {
     @Test
     fun testGetWithTenantRequired() = runTest {
         // Given
-        everySuspend { mockKeyValueManager.getTenantId() } returns "tenant-456"
+        everySuspend { mockKeyValueManager.getTenantId() } returns 123
 
         // When
         val result = networkManager.get<TestUser>(
@@ -180,7 +185,7 @@ class NetworkManagerTest {
     fun testGetWithBothAuthAndTenant() = runTest {
         // Given
         everySuspend { mockKeyValueManager.getIdToken() } returns "test-token"
-        everySuspend { mockKeyValueManager.getTenantId() } returns "test-tenant"
+        everySuspend { mockKeyValueManager.getTenantId() } returns 123
 
         // When
         val result = networkManager.get<TestUser>(
@@ -400,7 +405,7 @@ class NetworkManagerTest {
     fun testPatchWithTenantRequired() = runTest {
         // Given
         everySuspend { mockKeyValueManager.getIdToken() } returns "test-token"
-        everySuspend { mockKeyValueManager.getTenantId() } returns "test-tenant"
+        everySuspend { mockKeyValueManager.getTenantId() } returns 123
         val partialUpdate = mapOf("email" to "new@example.com")
 
         // When
@@ -469,7 +474,7 @@ class NetworkManagerTest {
     fun testDeleteWithAuthenticationAndTenant() = runTest {
         // Given
         everySuspend { mockKeyValueManager.getIdToken() } returns "test-token"
-        everySuspend { mockKeyValueManager.getTenantId() } returns "test-tenant"
+        everySuspend { mockKeyValueManager.getTenantId() } returns 123
 
         // When
         val result = networkManager.delete(
