@@ -1,5 +1,6 @@
 package org.example.asw_portal_kmp.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -91,6 +92,7 @@ fun LoginScreenSection(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

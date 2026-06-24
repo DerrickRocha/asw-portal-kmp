@@ -102,7 +102,7 @@ fun App() {
                                 content = {
                                     PinScreen(
                                         key.email,
-                                        onPinVerified = {
+                                        onContinueClicked = {
                                             backStack.clear()
                                             backStack.add(Route.Login)
                                         },

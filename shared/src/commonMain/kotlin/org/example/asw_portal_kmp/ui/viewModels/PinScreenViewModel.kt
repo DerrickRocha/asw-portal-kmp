@@ -27,12 +27,6 @@ class PinScreenViewModel(
     private val _state = MutableStateFlow(PinScreenState(email = email))
     val state: StateFlow<PinScreenState> = _state.asStateFlow()
 
-    private val _events = MutableSharedFlow<PinEvent>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val events = _events.asSharedFlow()
-
     fun onPinDigitEntered(digit: Int) {
         if (_state.value.pin.length < 6 && !_state.value.isLoading && !_state.value.isVerified) {
             _state.value = _state.value.copy(
@@ -82,7 +76,6 @@ class PinScreenViewModel(
                             isVerified = true,
                             error = null
                         )
-                        _events.emit(PinEvent.PinVerified)
                     }
                     is ConfirmResult.Failure -> {
                         _state.value = _state.value.copy(
@@ -99,12 +92,6 @@ class PinScreenViewModel(
                     error = e.message ?: "An error occurred during verification"
                 )
             }
-        }
-    }
-
-    fun onNavigateBack() {
-        viewModelScope.launch {
-            _events.emit(PinEvent.NavigateBack)
         }
     }
 
@@ -125,10 +112,6 @@ data class PinScreenState(
 )
 
 // Events
-sealed class PinEvent {
-    object PinVerified : PinEvent()
-    object NavigateBack : PinEvent()
-}
 
 // Result Types
 

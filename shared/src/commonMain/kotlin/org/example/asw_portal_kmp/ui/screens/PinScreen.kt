@@ -1,12 +1,8 @@
 package org.example.asw_portal_kmp.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,9 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
@@ -35,13 +28,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -56,42 +47,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.example.asw_portal_kmp.ui.viewModels.PinEvent
 import org.example.asw_portal_kmp.ui.viewModels.PinScreenState
 import org.example.asw_portal_kmp.ui.viewModels.PinScreenViewModel
 
 @Composable
 fun PinScreen(
     email: String,
-    onPinVerified: () -> Unit,
+    onContinueClicked: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val viewModel: PinScreenViewModel = viewModel { PinScreenViewModel(email = email) }
     val state by viewModel.state.collectAsState()
-
-    // Handle navigation events
-    LaunchedEffect(Unit) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is PinEvent.PinVerified -> {
-                    onPinVerified()
-                }
-
-                PinEvent.NavigateBack -> {
-                    onNavigateBack()
-                }
-            }
-        }
-    }
 
     PinScreenSection(
         state = state,
         onPinDigitEntered = viewModel::onPinDigitEntered,
         onPinBackspace = viewModel::onPinBackspace,
         onPinClear = viewModel::onPinClear,
+        onContinueClicked = onContinueClicked,
         onConfirmPin = viewModel::onConfirmPin,
         onResendPin = viewModel::onConfirmPin,
-        onNavigateBack = viewModel::onNavigateBack
+        onNavigateBack = onNavigateBack
     )
 }
 
@@ -101,6 +77,7 @@ fun PinScreenSection(
     onPinDigitEntered: (Int) -> Unit,
     onPinBackspace: () -> Unit,
     onPinClear: () -> Unit,
+    onContinueClicked: () -> Unit,
     onConfirmPin: () -> Unit,
     onResendPin: () -> Unit,
     onNavigateBack: () -> Unit
@@ -139,7 +116,7 @@ fun PinScreenSection(
 
                 // Manual continue button
                 Button(
-                    onClick = onConfirmPin,
+                    onClick = onContinueClicked,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp)

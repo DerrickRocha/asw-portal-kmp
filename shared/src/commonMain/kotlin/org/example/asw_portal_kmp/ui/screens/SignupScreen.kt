@@ -139,37 +139,6 @@ fun SignupScreenSection(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            // Company Name Field (Optional)
-            OutlinedTextField(
-                value = state.companyName,
-                onValueChange = onUpdateCompanyName,
-                label = { Text("Company Name") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(companyNameFocusRequester),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = { onSignUpClick() }
-                ),
-                enabled = !state.isLoading,
-                singleLine = true,
-                isError = state.companyNameError != null
-            )
-
-            if (state.companyNameError != null) {
-                Text(
-                    text = state.companyNameError!!,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, top = 4.dp)
-                )
-            }
-
             if (state.generalError != null) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -179,8 +148,6 @@ fun SignupScreenSection(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
 
             // Email Field
             OutlinedTextField(
@@ -297,6 +264,39 @@ fun SignupScreenSection(
             if (state.confirmPasswordError != null) {
                 Text(
                     text = state.confirmPasswordError!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, top = 4.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Company Name Field (Optional)
+            OutlinedTextField(
+                value = state.companyName,
+                onValueChange = onUpdateCompanyName,
+                label = { Text("Company Name") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(companyNameFocusRequester),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { onSignUpClick() }
+                ),
+                enabled = !state.isLoading,
+                singleLine = true,
+                isError = state.companyNameError != null
+            )
+
+            if (state.companyNameError != null) {
+                Text(
+                    text = state.companyNameError!!,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier
