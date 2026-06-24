@@ -16,8 +16,6 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import org.example.asw_portal_kmp.Dependencies.kvManager
-import org.example.asw_portal_kmp.data.KeyValuePairManagerImplementation
-import org.example.asw_portal_kmp.data.createDataStore
 import org.example.asw_portal_kmp.navigation.Route
 import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack
 import org.example.asw_portal_kmp.ui.screens.LoginScreen
@@ -76,17 +74,27 @@ fun App() {
                         Route.Splash -> NavEntry(key = key, content = { Text("Splash") })
                         Route.Login -> NavEntry(
                             key = key,
-                            content = { LoginScreen(onNavigateToSignUp = {
-                                backStack.clear()
-                                backStack.add(Route.Signup)
-                            }) })
+                            content = {
+                                LoginScreen(onNavigateToSignUp = {
+                                    backStack.clear()
+                                    backStack.add(Route.Signup)
+                                })
+                            })
 
                         Route.Signup -> NavEntry(
                             key = key,
-                            content = { SignupScreen({}, onNavigateToLogin = {
-                                backStack.clear()
-                                backStack.add(Route.Login)
-                            }) })
+                            content = {
+                                SignupScreen(
+                                    {
+                                        backStack.clear()
+                                        backStack.add(Route.PinScreen)
+                                    },
+                                    onNavigateToLogin = {
+                                        backStack.clear()
+                                        backStack.add(Route.Login)
+                                    })
+                            })
+                        Route.PinScreen -> NavEntry(key = key, content = { Text("Pin Screen") })
 
                         Route.TenantSelection -> NavEntry(key = key, content = { Text("Tenant Selection") })
                         is Route.TenantConsole -> NavEntry(key = key, content = { Text("Tenant Console") })

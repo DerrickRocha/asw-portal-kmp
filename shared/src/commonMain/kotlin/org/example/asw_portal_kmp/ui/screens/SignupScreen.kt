@@ -52,7 +52,7 @@ import org.example.asw_portal_kmp.ui.viewModels.SignupViewModel
 
 @Composable
 fun SignupScreen(
-    onNavigateToTenantConsole: (Int) -> Unit,
+    onNavigateToPinScreen: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
     val viewModel: SignupViewModel = viewModel { SignupViewModel() }
@@ -62,8 +62,8 @@ fun SignupScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                is SignupEvent.NavigateToTenantConsole -> {
-                    onNavigateToTenantConsole(event.tenantId)
+                is SignupEvent.NavigateToPinScreen -> {
+                    onNavigateToPinScreen()
                 }
                 SignupEvent.NavigateToLogin -> {
                     onNavigateToLogin()
@@ -80,13 +80,15 @@ fun SignupScreen(
         onUpdateSubdomain = viewModel::updateSubdomain,
         onUpdateCustomDomain = viewModel::updateCustomDomain,
         onSignUpClick = viewModel::signUp,
-        onNavigateToLogin = onNavigateToLogin
+        onNavigateToLogin = onNavigateToLogin,
+        onUpdateCompanyName = viewModel::updateCompanyName
     )
 }
 
 @Composable
 fun SignupScreenSection(
     state: SignupScreenState,
+    onUpdateCompanyName: (String) -> Unit,
     onUpdateEmail: (String) -> Unit,
     onUpdatePassword: (String) -> Unit,
     onUpdateConfirmPassword: (String) -> Unit,
@@ -100,6 +102,7 @@ fun SignupScreenSection(
     val confirmPasswordFocusRequester = remember { FocusRequester() }
     val subdomainFocusRequester = remember { FocusRequester() }
     val customDomainFocusRequester = remember { FocusRequester() }
+    val companyNameFocusRequester = remember { FocusRequester() }
 
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
@@ -135,6 +138,49 @@ fun SignupScreenSection(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 32.dp)
             )
+
+            // Company Name Field (Optional)
+            OutlinedTextField(
+                value = state.companyName,
+                onValueChange = onUpdateCompanyName,
+                label = { Text("Company Name") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(companyNameFocusRequester),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { onSignUpClick() }
+                ),
+                enabled = !state.isLoading,
+                singleLine = true,
+                isError = state.companyNameError != null
+            )
+
+            if (state.companyNameError != null) {
+                Text(
+                    text = state.companyNameError!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, top = 4.dp)
+                )
+            }
+
+            if (state.generalError != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = state.generalError!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Email Field
             OutlinedTextField(

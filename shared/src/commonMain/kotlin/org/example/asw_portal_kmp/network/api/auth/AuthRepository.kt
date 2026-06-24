@@ -11,11 +11,15 @@ import org.example.asw_portal_kmp.network.NetworkResult
 import org.example.asw_portal_kmp.network.TenantException
 import org.example.asw_portal_kmp.network.postJson
 import org.example.asw_portal_kmp.network.requests.LoginRequest
+import org.example.asw_portal_kmp.network.requests.SignupRequest
+import org.example.asw_portal_kmp.network.requests.SignupResponse
 import org.example.asw_portal_kmp.network.responses.LoginResponse
+import org.example.asw_portal_kmp.ui.viewModels.SignupResult
 
 interface AuthRepository {
 
     suspend fun login(username: String, password: String): LoginResult
+    suspend fun signup(companyName: String, email: String, password: String, subdomain: String, customDomain: String?): SignupResult
 }
 
 class AuthRepositoryImpl(
@@ -61,6 +65,26 @@ class AuthRepositoryImpl(
                 is NetworkResult.Success<LoginResponse> -> {
                     keyValuePairManager.saveIdToken(response.data.idToken)
                     LoginResult.Success
+                }
+            }
+        }
+    }
+
+    override suspend fun signup(
+        companyName: String,
+        email: String,
+        password: String,
+        subdomain: String,
+        customDomain: String?
+    ): SignupResult {
+        return withContext(ioDispatcher) {
+            val request = SignupRequest(companyName, email, password, subdomain, customDomain)
+            val response = networkManager.postJson<SignupRequest, SignupResponse>("/auth/register", request)
+            when (response) {
+                is NetworkResult.Error -> SignupResult.Failure(response.message)
+                is NetworkResult.Exception -> SignupResult.Failure(response.throwable.message ?: "Signup failed")
+                is NetworkResult.Success<SignupResponse> -> {
+                    SignupResult.Success(response.data.tenantId)
                 }
             }
         }
