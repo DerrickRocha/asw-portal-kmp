@@ -10,9 +10,11 @@ import org.example.asw_portal_kmp.network.NetworkManager
 import org.example.asw_portal_kmp.network.NetworkResult
 import org.example.asw_portal_kmp.network.TenantException
 import org.example.asw_portal_kmp.network.postJson
+import org.example.asw_portal_kmp.network.requests.ConfirmRequest
 import org.example.asw_portal_kmp.network.requests.LoginRequest
 import org.example.asw_portal_kmp.network.requests.SignupRequest
 import org.example.asw_portal_kmp.network.requests.SignupResponse
+import org.example.asw_portal_kmp.network.responses.ConfirmResponse
 import org.example.asw_portal_kmp.network.responses.LoginResponse
 import org.example.asw_portal_kmp.ui.viewModels.SignupResult
 
@@ -20,6 +22,8 @@ interface AuthRepository {
 
     suspend fun login(username: String, password: String): LoginResult
     suspend fun signup(companyName: String, email: String, password: String, subdomain: String, customDomain: String?): SignupResult
+
+    suspend fun confirm(email: String, confirmationCode: String): ConfirmResult
 }
 
 class AuthRepositoryImpl(
@@ -87,6 +91,21 @@ class AuthRepositoryImpl(
                     SignupResult.Success(response.data.tenantId)
                 }
             }
+        }
+    }
+
+    override suspend fun confirm(
+        email: String,
+        confirmationCode: String
+    ): ConfirmResult {
+        return withContext(ioDispatcher) {
+            val response = networkManager.postJson<ConfirmRequest, ConfirmResponse>("/auth/confirm", ConfirmRequest(email, confirmationCode))
+            when (response) {
+                is NetworkResult.Error -> ConfirmResult.Failure(response.message)
+                is NetworkResult.Exception -> ConfirmResult.Failure(response.throwable.message ?: "Confirmation failed")
+                is NetworkResult.Success<ConfirmResponse> -> ConfirmResult.Success
+            }
+
         }
     }
 

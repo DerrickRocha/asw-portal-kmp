@@ -22,7 +22,7 @@ sealed interface Route: NavKey {
     @Serializable
     data object Signup: Route
     @Serializable
-    data object PinScreen: Route
+    data class PinScreen(val email: String): Route
 
     @Serializable
     data object TenantSelection: Route

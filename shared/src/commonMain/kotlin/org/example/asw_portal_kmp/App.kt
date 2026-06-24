@@ -19,6 +19,7 @@ import org.example.asw_portal_kmp.Dependencies.kvManager
 import org.example.asw_portal_kmp.navigation.Route
 import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack
 import org.example.asw_portal_kmp.ui.screens.LoginScreen
+import org.example.asw_portal_kmp.ui.screens.PinScreen
 import org.example.asw_portal_kmp.ui.screens.SignupScreen
 import org.example.asw_portal_kmp.ui.viewModels.AppEffects
 import org.example.asw_portal_kmp.ui.viewModels.AppViewModel
@@ -85,16 +86,29 @@ fun App() {
                             key = key,
                             content = {
                                 SignupScreen(
-                                    {
+                                    { email ->
                                         backStack.clear()
-                                        backStack.add(Route.PinScreen)
+                                        backStack.add(Route.PinScreen(email))
                                     },
                                     onNavigateToLogin = {
                                         backStack.clear()
                                         backStack.add(Route.Login)
                                     })
                             })
-                        Route.PinScreen -> NavEntry(key = key, content = { Text("Pin Screen") })
+
+                        is Route.PinScreen -> {
+                            NavEntry(
+                                key = key,
+                                content = {
+                                    PinScreen(
+                                        key.email,
+                                        onPinVerified = {
+                                            backStack.clear()
+                                            backStack.add(Route.Login)
+                                        },
+                                        onNavigateBack = { backStack.removeLast() })
+                                })
+                        }
 
                         Route.TenantSelection -> NavEntry(key = key, content = { Text("Tenant Selection") })
                         is Route.TenantConsole -> NavEntry(key = key, content = { Text("Tenant Console") })

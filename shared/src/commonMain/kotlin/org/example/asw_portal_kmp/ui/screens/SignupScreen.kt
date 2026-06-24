@@ -52,7 +52,7 @@ import org.example.asw_portal_kmp.ui.viewModels.SignupViewModel
 
 @Composable
 fun SignupScreen(
-    onNavigateToPinScreen: () -> Unit,
+    onNavigateToPinScreen: (String) -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
     val viewModel: SignupViewModel = viewModel { SignupViewModel() }
@@ -63,7 +63,7 @@ fun SignupScreen(
         viewModel.events.collect { event ->
             when (event) {
                 is SignupEvent.NavigateToPinScreen -> {
-                    onNavigateToPinScreen()
+                    onNavigateToPinScreen(event.email)
                 }
                 SignupEvent.NavigateToLogin -> {
                     onNavigateToLogin()

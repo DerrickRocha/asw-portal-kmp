@@ -126,7 +126,7 @@ class SignupViewModel(
                 when (result) {
                     is SignupResult.Success -> {
                         _state.value = _state.value.copy(isLoading = false)
-                        _events.emit(SignupEvent.NavigateToPinScreen)
+                        _events.emit(SignupEvent.NavigateToPinScreen(_state.value.email))
                     }
 
                     is SignupResult.Failure -> {
@@ -291,7 +291,7 @@ data class SignupScreenState(
 // Updated Event
 sealed class SignupEvent {
     object NavigateToLogin : SignupEvent()
-    object NavigateToPinScreen : SignupEvent()
+    data class NavigateToPinScreen(val email: String) : SignupEvent()
 }
 
 // Updated Result
