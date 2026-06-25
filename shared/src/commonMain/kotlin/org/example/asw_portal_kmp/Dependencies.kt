@@ -7,6 +7,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import org.example.asw_portal_kmp.data.Encryptor
+import org.example.asw_portal_kmp.data.KeyValuePairManager
 import org.example.asw_portal_kmp.data.KeyValuePairManagerImplementation
 import org.example.asw_portal_kmp.data.createDataStore
 import org.example.asw_portal_kmp.network.NetworkConfig
@@ -34,7 +36,8 @@ object Dependencies {
         expectSuccess = true
     }
     private val store = createDataStore()
-    val kvManager = KeyValuePairManagerImplementation(store)
+    private val encryptor = Encryptor()
+    val kvManager: KeyValuePairManager = KeyValuePairManagerImplementation(store, encryptor)
     private val networkManager = NetworkManagerImplementation(client, kvManager)
 
     val authRepository = AuthRepositoryImpl(networkManager, kvManager)
