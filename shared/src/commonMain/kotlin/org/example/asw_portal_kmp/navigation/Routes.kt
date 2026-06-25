@@ -20,6 +20,11 @@ sealed interface Route: NavKey {
     data object Login: Route
 
     @Serializable
+    data object Signup: Route
+    @Serializable
+    data class PinScreen(val email: String): Route
+
+    @Serializable
     data object TenantSelection: Route
     @Serializable
     data class TenantConsole(val tenantId: Int): Route

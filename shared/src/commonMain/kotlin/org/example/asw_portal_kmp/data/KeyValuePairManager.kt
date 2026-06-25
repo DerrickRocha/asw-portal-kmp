@@ -20,7 +20,8 @@ interface KeyValuePairManager {
 }
 
 class KeyValuePairManagerImplementation(
-    private val store: DataStore<Preferences>
+    private val store: DataStore<Preferences>,
+    private val encryptor: Encryptor
 ): KeyValuePairManager {
 
     companion object {
@@ -41,7 +42,9 @@ class KeyValuePairManagerImplementation(
 
     override suspend fun getIdToken(): String? {
         return store.data.map { preferences ->
-            preferences[KEY_ID_TOKEN]
+            val token = preferences[KEY_ID_TOKEN]
+            if (token.isNullOrBlank()) return@map null
+            encryptor.decrypt(token)
         }.first()
     }
 
@@ -53,7 +56,8 @@ class KeyValuePairManagerImplementation(
 
     override suspend fun saveIdToken(token: String) {
         store.edit { preferences ->
-            preferences[KEY_ID_TOKEN] = token
+            val encryptedToken = encryptor.encrypt(token)
+            preferences[KEY_ID_TOKEN] = encryptedToken
         }
     }
 
