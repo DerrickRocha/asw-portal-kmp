@@ -39,11 +39,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -149,7 +152,14 @@ fun PinScreenSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     repeat(pinLength) { index ->
-                        PinDot(
+                        /*PinDot(
+                            isFilled = index < state.pin.length,
+                            isError = state.error != null,
+                            isVerified = state.isVerified
+                        )*/
+                        PinDigit(
+                            digit = state.pin.getOrNull(index)?.toString() ?: "",
+                            isActive = index == state.pin.length,
                             isFilled = index < state.pin.length,
                             isError = state.error != null,
                             isVerified = state.isVerified
@@ -227,6 +237,90 @@ fun PinScreenSection(
                     Text("Cancel")
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun PinDigit(
+    digit: String,
+    isActive: Boolean,
+    isFilled: Boolean,
+    isError: Boolean,
+    isVerified: Boolean
+) {
+    val animatedScale by animateFloatAsState(
+        targetValue = if (isActive && !isFilled) 0.8f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "digit_scale"
+    )
+
+    val color = when {
+        isVerified -> MaterialTheme.colorScheme.primary
+        isError -> MaterialTheme.colorScheme.error
+        isFilled -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.outline
+    }
+
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .border(
+                width = if (isActive && !isFilled) 3.dp else 2.dp,
+                color = if (isActive && !isFilled)
+                    MaterialTheme.colorScheme.primary
+                else
+                    color,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .background(
+                color = if (isActive && !isFilled)
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+                else
+                    Color.Transparent,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .graphicsLayer {
+                scaleX = animatedScale
+                scaleY = animatedScale
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        if (isFilled) {
+            Text(
+                text = digit,
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = color
+            )
+        } else if (isActive) {
+            // Blinking cursor
+            Box(
+                modifier = Modifier
+                    .width(2.dp)
+                    .height(32.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(1.dp)
+                    )
+            )
+        }
+
+        // Success animation overlay
+        if (isVerified) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+            )
         }
     }
 }
@@ -504,4 +598,25 @@ fun KeypadButton(
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
         )
     }
+}
+
+@Preview
+@Composable
+fun PinScreenPreview() {
+    PinScreenSection(
+        state = PinScreenState(
+            pin = "1234",
+            isLoading = false,
+            isVerified = false,
+            error = null,
+            isResending = false
+        ),
+        onPinDigitEntered = {},
+        onPinBackspace = {},
+        onPinClear = {},
+        onContinueClicked = {},
+        onConfirmPin = {},
+        onResendPin = {},
+        onNavigateBack = {}
+    )
 }
