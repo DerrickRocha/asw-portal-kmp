@@ -14,7 +14,10 @@ import org.example.asw_portal_kmp.data.createDataStore
 import org.example.asw_portal_kmp.network.NetworkConfig
 import org.example.asw_portal_kmp.network.NetworkManager
 import org.example.asw_portal_kmp.network.NetworkManagerImplementation
+import org.example.asw_portal_kmp.network.api.auth.AuthRepository
 import org.example.asw_portal_kmp.network.api.auth.AuthRepositoryImpl
+import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
+import org.example.asw_portal_kmp.network.api.tenants.TenantsRepositoryImplementation
 
 object Dependencies {
 
@@ -40,6 +43,8 @@ object Dependencies {
     val kvManager: KeyValuePairManager = KeyValuePairManagerImplementation(store, encryptor)
     private val networkManager = NetworkManagerImplementation(client, kvManager)
 
-    val authRepository = AuthRepositoryImpl(networkManager, kvManager)
+    val authRepository: AuthRepository = AuthRepositoryImpl(networkManager, kvManager)
+
+    val tenantsRepository: TenantsRepository = TenantsRepositoryImplementation(networkManager)
 
 }

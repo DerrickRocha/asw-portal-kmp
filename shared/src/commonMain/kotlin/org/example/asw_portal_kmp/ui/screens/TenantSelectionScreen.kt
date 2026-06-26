@@ -25,24 +25,25 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.ktor.websocket.Frame
-import org.example.asw_portal_kmp.Dependencies
 import org.example.asw_portal_kmp.ui.viewModels.Tenant
+import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionEvent
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionState
+import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionViewModel
 import org.example.asw_portal_kmp.utils.DateUtils
 
 @Composable
@@ -50,11 +51,8 @@ fun TenantSelectionScreen(
     onNavigateToTenantConsole: (Int) -> Unit,
     onNavigateToCreateTenant: () -> Unit
 ) {
-   /* val viewModel: TenantSelectionScreenViewModel = viewModel {
-        TenantSelectionScreenViewModel(
-            repository = Dependencies.tenantRepository,
-            keyValuePairManager = Dependencies.kvManager
-        )
+    val viewModel: TenantSelectionViewModel = viewModel {
+        TenantSelectionViewModel()
     }
 
     val state by viewModel.state.collectAsState()
@@ -63,10 +61,10 @@ fun TenantSelectionScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                is TenantSelectionScreenViewModel.TenantSelectionEvent.NavigateToTenantConsole -> {
+                is TenantSelectionEvent.NavigateToTenantConsole -> {
                     onNavigateToTenantConsole(event.tenantId)
                 }
-                TenantSelectionScreenViewModel.TenantSelectionEvent.NavigateToCreateTenant -> {
+                TenantSelectionEvent.NavigateToCreateTenant -> {
                     onNavigateToCreateTenant()
                 }
             }
@@ -76,9 +74,9 @@ fun TenantSelectionScreen(
     TenantSelectionScreenContent(
         state = state,
         onTenantSelected = viewModel::selectTenant,
-        onCreateTenantClick = viewModel::navigateToCreateTenant,
+        onCreateTenantClick = {},
         onRetryClick = viewModel::retry
-    )*/
+    )
 }
 
 @Composable
@@ -89,15 +87,20 @@ fun TenantSelectionScreenContent(
     onRetryClick: () -> Unit
 ) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Frame.Text("Select Tenant") },
-                actions = {
-                    IconButton(onClick = onCreateTenantClick) {
-                        Icon(Icons.Default.Add, contentDescription = "Create Tenant")
-                    }
-                }
-            )
+        floatingActionButton = {
+            // Floating Action Button for creating tenant
+            FloatingActionButton(
+                onClick = onCreateTenantClick,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier
+                    .size(56.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Create Tenant"
+                )
+            }
         }
     ) { paddingValues ->
         Box(

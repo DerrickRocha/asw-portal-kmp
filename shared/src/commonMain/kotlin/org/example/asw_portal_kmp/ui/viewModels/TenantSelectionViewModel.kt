@@ -9,12 +9,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.example.asw_portal_kmp.Dependencies
 import org.example.asw_portal_kmp.data.KeyValuePairManager
+import org.example.asw_portal_kmp.network.api.tenants.Result
 import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
 
 class TenantSelectionViewModel(
-    private val keyValuePairManager: KeyValuePairManager,
-    private val repository: TenantsRepository
+    private val keyValuePairManager: KeyValuePairManager = Dependencies.kvManager,
+    private val repository: TenantsRepository = Dependencies.tenantsRepository
 ): ViewModel() {
 
     private val _state = MutableStateFlow(TenantSelectionState())
@@ -39,13 +41,13 @@ class TenantSelectionViewModel(
 
             try {
                 val result = repository.getTenants()
-                when (result.isSuccess) {
-                    true -> _state.value = _state.value.copy(
-                        tenants = result.getOrNull() ?: emptyList(),
+                when(result) {
+                    is Result.Failure -> _state.value = _state.value.copy(
+                        error = result.message,
                         isLoading = false
                     )
-                    false -> _state.value = _state.value.copy(
-                        error = result.exceptionOrNull()?.message ?: "Failed to load tenants",
+                    is Result.Success<List<Tenant>> -> _state.value = _state.value.copy(
+                        tenants = result.data,
                         isLoading = false
                     )
                 }
@@ -63,6 +65,10 @@ class TenantSelectionViewModel(
             keyValuePairManager.saveTenantId(tenant.id)
             _events.emit(TenantSelectionEvent.NavigateToTenantConsole(tenant.id))
         }
+    }
+
+    fun retry() {
+        loadTenants()
     }
 }
 
