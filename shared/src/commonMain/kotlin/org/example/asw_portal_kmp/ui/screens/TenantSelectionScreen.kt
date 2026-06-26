@@ -57,7 +57,6 @@ fun TenantSelectionScreen(
 
     val state by viewModel.state.collectAsState()
 
-    // Handle navigation events
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
@@ -85,7 +84,6 @@ fun TenantSelectionScreenContent(
 ) {
     Scaffold(
         floatingActionButton = {
-            // Floating Action Button for creating tenant
             FloatingActionButton(
                 onClick = onCreateTenantClick,
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -112,7 +110,7 @@ fun TenantSelectionScreenContent(
 
                 state.error != null -> {
                     ErrorContent(
-                        error = state.error!!,
+                        error = state.error,
                         onRetry = onRetryClick
                     )
                 }
@@ -271,7 +269,6 @@ fun TenantListItem(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Tenant Name
             Text(
                 text = tenant.name,
                 style = MaterialTheme.typography.titleLarge,
@@ -282,7 +279,6 @@ fun TenantListItem(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // URL
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -305,7 +301,6 @@ fun TenantListItem(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Updated At
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
