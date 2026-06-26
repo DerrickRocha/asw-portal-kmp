@@ -51,7 +51,7 @@ class TenantsRepositoryImplementation(
         domain: String,
         customDomain: String?
     ): Result<Tenant> {
-        TODO("Not yet implemented")
+        return Result.Success(Tenant(1, name, domain, customDomain ?: domain, "", "", ""))
     }
 
 }
