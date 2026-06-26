@@ -109,17 +109,20 @@ fun TenantSelectionScreenContent(
                 state.isLoading -> {
                     LoadingContent()
                 }
+
                 state.error != null -> {
                     ErrorContent(
                         error = state.error!!,
                         onRetry = onRetryClick
                     )
                 }
+
                 state.tenants.isEmpty() -> {
                     EmptyContent(
                         onCreateTenant = onCreateTenantClick
                     )
                 }
+
                 else -> {
                     TenantListContent(
                         tenants = state.tenants,
@@ -290,8 +293,9 @@ fun TenantListItem(
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
+                val customDomain = if (tenant.customDomain.isNullOrBlank()) tenant.subDomain else tenant.customDomain
                 Text(
-                    text = tenant.customDomain ?: "${tenant.domain}.yourapp.com",
+                    text = "${customDomain}.agilesouthwest.com",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
@@ -328,8 +332,24 @@ fun TenantSelectionScreenPreview() {
     TenantSelectionScreenContent(
         state = TenantSelectionState(
             tenants = listOf(
-                Tenant(1, "Tenant 1", "tenant1.yourapp.com", "tenant1.yourapp.com", "2023-01-01T12:00:00Z"),
-                Tenant(2, "Tenant 2", "tenant2.yourapp.com", "tenant2.yourapp.com", "2023-01-02T12:00:00Z")
+                Tenant(
+                    1,
+                    "Tenant 1",
+                    "tenant1.yourapp.com",
+                    "tenant1.yourapp.com",
+                    "2023-01-01T12:00:00Z",
+                    "2023-01-02T12:00:00Z",
+                    "2023-01-02T12:00:00Z"
+                ),
+                Tenant(
+                    2,
+                    "Tenant 2",
+                    "tenant2.yourapp.com",
+                    "tenant2.yourapp.com",
+                    "2023-01-02T12:00:00Z",
+                    "2023-01-02T12:00:00Z",
+                    "2023-01-02T12:00:00Z"
+                )
             )
         ),
         onTenantSelected = {},

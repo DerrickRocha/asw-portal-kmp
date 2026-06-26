@@ -40,6 +40,9 @@ sealed interface Route: NavKey {
     data object Inventories: Route
     @Serializable
     data class InventoryItemDetails(val inventoryId: Int): Route
+
+    @Serializable
+    data object CreateTenant: Route
 }
 
 @OptIn(ExperimentalSerializationApi::class)

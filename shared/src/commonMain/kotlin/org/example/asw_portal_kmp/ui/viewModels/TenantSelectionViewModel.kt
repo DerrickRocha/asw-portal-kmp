@@ -63,8 +63,8 @@ class TenantSelectionViewModel(
 
     fun selectTenant(tenant: Tenant) {
         viewModelScope.launch {
-            keyValuePairManager.saveTenantId(tenant.id)
-            _events.emit(TenantSelectionEvent.NavigateToTenantConsole(tenant.id))
+            keyValuePairManager.saveTenantId(tenant.tenantId)
+            _events.emit(TenantSelectionEvent.NavigateToTenantConsole(tenant.tenantId))
         }
     }
 
