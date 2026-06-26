@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
 import org.example.asw_portal_kmp.data.KeyValuePairManager
 import org.example.asw_portal_kmp.network.api.tenants.Result
+import org.example.asw_portal_kmp.network.api.tenants.Tenant
 import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
 
 class TenantSelectionViewModel(
@@ -72,7 +73,6 @@ class TenantSelectionViewModel(
     }
 }
 
-data class Tenant(val id: Int, val name: String, val domain: String, val customDomain: String, val updatedAt: String)
 data class TenantSelectionState(
     val tenants: List<Tenant> = emptyList(),
     val isLoading: Boolean = false,
@@ -81,5 +81,4 @@ data class TenantSelectionState(
 
 sealed class TenantSelectionEvent {
     data class NavigateToTenantConsole(val tenantId: Int) : TenantSelectionEvent()
-    object NavigateToCreateTenant : TenantSelectionEvent()
 }

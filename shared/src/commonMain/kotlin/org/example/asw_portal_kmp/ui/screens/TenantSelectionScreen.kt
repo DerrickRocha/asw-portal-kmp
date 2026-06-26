@@ -40,7 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.example.asw_portal_kmp.ui.viewModels.Tenant
+import org.example.asw_portal_kmp.network.api.tenants.Tenant
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionEvent
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionState
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionViewModel
@@ -64,9 +64,6 @@ fun TenantSelectionScreen(
                 is TenantSelectionEvent.NavigateToTenantConsole -> {
                     onNavigateToTenantConsole(event.tenantId)
                 }
-                TenantSelectionEvent.NavigateToCreateTenant -> {
-                    onNavigateToCreateTenant()
-                }
             }
         }
     }
@@ -74,7 +71,7 @@ fun TenantSelectionScreen(
     TenantSelectionScreenContent(
         state = state,
         onTenantSelected = viewModel::selectTenant,
-        onCreateTenantClick = {},
+        onCreateTenantClick = onNavigateToCreateTenant,
         onRetryClick = viewModel::retry
     )
 }
