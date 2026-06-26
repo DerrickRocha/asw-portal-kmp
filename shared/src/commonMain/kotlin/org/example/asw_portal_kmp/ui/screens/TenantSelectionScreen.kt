@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.ktor.websocket.Frame
 import org.example.asw_portal_kmp.Dependencies
+import org.example.asw_portal_kmp.ui.viewModels.Tenant
+import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionState
 import org.example.asw_portal_kmp.utils.DateUtils
 
 @Composable
@@ -79,12 +81,6 @@ fun TenantSelectionScreen(
     )*/
 }
 
-data class Tenant(val id: Int, val name: String, val domain: String, val customDomain: String, val updatedAt: String)
-data class TenantSelectionState(
-    val tenants: List<Tenant> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
 @Composable
 fun TenantSelectionScreenContent(
     state: TenantSelectionState,
