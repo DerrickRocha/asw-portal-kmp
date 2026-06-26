@@ -21,6 +21,7 @@ import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack
 import org.example.asw_portal_kmp.ui.screens.LoginScreen
 import org.example.asw_portal_kmp.ui.screens.PinScreen
 import org.example.asw_portal_kmp.ui.screens.SignupScreen
+import org.example.asw_portal_kmp.ui.screens.TenantSelectionScreen
 import org.example.asw_portal_kmp.ui.viewModels.AppEffects
 import org.example.asw_portal_kmp.ui.viewModels.AppViewModel
 import kotlin.collections.listOf
@@ -110,7 +111,17 @@ fun App() {
                                 })
                         }
 
-                        Route.TenantSelection -> NavEntry(key = key, content = { Text("Tenant Selection") })
+                        Route.TenantSelection -> NavEntry(
+                            key = key,
+                            content = {
+                                TenantSelectionScreen(
+                                    onNavigateToTenantConsole = { tenantId ->
+                                        backStack.clear()
+                                        backStack.add(Route.TenantConsole(tenantId))
+                                    },
+                                    onNavigateToCreateTenant = { backStack.add(Route.CreateTenant) })
+                            })
+
                         is Route.TenantConsole -> NavEntry(key = key, content = { Text("Tenant Console") })
                         else -> NavEntry(key = key, content = { Text("Unknown") })
                     }

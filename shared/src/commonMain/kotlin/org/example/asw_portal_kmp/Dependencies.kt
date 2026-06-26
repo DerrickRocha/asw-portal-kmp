@@ -6,6 +6,7 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.utils.io.ioDispatcher
 import kotlinx.serialization.json.Json
 import org.example.asw_portal_kmp.data.Encryptor
 import org.example.asw_portal_kmp.data.KeyValuePairManager
@@ -14,12 +15,15 @@ import org.example.asw_portal_kmp.data.createDataStore
 import org.example.asw_portal_kmp.network.NetworkConfig
 import org.example.asw_portal_kmp.network.NetworkManager
 import org.example.asw_portal_kmp.network.NetworkManagerImplementation
+import org.example.asw_portal_kmp.network.api.auth.AuthRepository
 import org.example.asw_portal_kmp.network.api.auth.AuthRepositoryImpl
+import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
+import org.example.asw_portal_kmp.network.api.tenants.TenantsRepositoryImplementation
 
 object Dependencies {
 
     private val networkConfig = NetworkConfig()
-    private val client = HttpClient(){
+    private val client = HttpClient() {
         install(ContentNegotiation) {
             json(
                 Json {
@@ -40,6 +44,9 @@ object Dependencies {
     val kvManager: KeyValuePairManager = KeyValuePairManagerImplementation(store, encryptor)
     private val networkManager = NetworkManagerImplementation(client, kvManager)
 
-    val authRepository = AuthRepositoryImpl(networkManager, kvManager)
+    private val dispatcher = ioDispatcher()
+    val authRepository: AuthRepository = AuthRepositoryImpl(networkManager, kvManager, dispatcher)
+
+    val tenantsRepository: TenantsRepository = TenantsRepositoryImplementation(networkManager, dispatcher)
 
 }

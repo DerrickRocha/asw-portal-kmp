@@ -134,7 +134,7 @@ suspend inline fun <reified T, reified R> NetworkManager.postJson(
     return post(url, requestBody, params, options, serialize, deserialize)
 }
 
-suspend inline fun <reified T, reified R> NetworkManager.getJson(
+suspend inline fun <reified R> NetworkManager.getJson(
     url: String,
     params: Map<String, String> = emptyMap(),
     options: RequestOptions = RequestOptions(),
