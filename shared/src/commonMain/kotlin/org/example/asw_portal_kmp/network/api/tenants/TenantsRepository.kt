@@ -5,14 +5,15 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.example.asw_portal_kmp.network.NetworkManager
 import org.example.asw_portal_kmp.network.NetworkResult
+import org.example.asw_portal_kmp.network.api.RepositoryResult
 import org.example.asw_portal_kmp.network.RequestOptions
 import org.example.asw_portal_kmp.network.getJson
 import org.example.asw_portal_kmp.network.postJson
 
 interface TenantsRepository {
 
-    suspend fun getTenants(): Result<List<Tenant>>
-    suspend fun createTenant(name: String, domain: String, customDomain: String?): Result<AddTenantResponse>
+    suspend fun getTenants(): RepositoryResult<List<Tenant>>
+    suspend fun createTenant(name: String, domain: String, customDomain: String?): RepositoryResult<AddTenantResponse>
 }
 
 class TenantsRepositoryImplementation(
@@ -20,7 +21,7 @@ class TenantsRepositoryImplementation(
     private val dispatcher: CoroutineDispatcher
 ) : TenantsRepository {
 
-    override suspend fun getTenants(): Result<List<Tenant>> = withContext(dispatcher) {
+    override suspend fun getTenants(): RepositoryResult<List<Tenant>> = withContext(dispatcher) {
         try {
             val response = networkManager.getJson<List<Tenant>>(
                 url = "/tenants/all",
@@ -32,19 +33,19 @@ class TenantsRepositoryImplementation(
 
             when (response) {
                 is NetworkResult.Success -> {
-                    Result.Success(response.data)
+                    RepositoryResult.Success(response.data)
                 }
 
                 is NetworkResult.Error -> {
-                    Result.Failure(response.message)
+                    RepositoryResult.Failure(response.message)
                 }
 
                 is NetworkResult.Exception -> {
-                    Result.Failure(response.throwable.message ?: "Failed to fetch tenants")
+                    RepositoryResult.Failure(response.throwable.message ?: "Failed to fetch tenants")
                 }
             }
         } catch (e: Exception) {
-            Result.Failure(e.message ?: "An unexpected error occurred")
+            RepositoryResult.Failure(e.message ?: "An unexpected error occurred")
         }
     }
 
@@ -52,16 +53,16 @@ class TenantsRepositoryImplementation(
         name: String,
         domain: String,
         customDomain: String?
-    ): Result<AddTenantResponse> = withContext(dispatcher) {
+    ): RepositoryResult<AddTenantResponse> = withContext(dispatcher) {
         val networkResult = networkManager.postJson<AddTenantRequest, AddTenantResponse>(
             "/tenants",
             AddTenantRequest(name, domain, customDomain),
             options = RequestOptions(isAuthRequired = true, isTenantRequired = false)
         )
         when(networkResult) {
-            is NetworkResult.Success -> Result.Success(networkResult.data)
-            is NetworkResult.Error -> Result.Failure(networkResult.message)
-            is NetworkResult.Exception -> Result.Failure(networkResult.throwable.message ?: "Failed to create tenant")
+            is NetworkResult.Success -> RepositoryResult.Success(networkResult.data)
+            is NetworkResult.Error -> RepositoryResult.Failure(networkResult.message)
+            is NetworkResult.Exception -> RepositoryResult.Failure(networkResult.throwable.message ?: "Failed to create tenant")
         }
     }
 
@@ -84,8 +85,3 @@ data class AddTenantResponse(
     val updatedAt: String,
     val rowVersion: String
 )
-
-sealed class Result<out T> {
-    data class Success<out T>(val data: T) : Result<T>()
-    data class Failure(val message: String) : Result<Nothing>()
-}

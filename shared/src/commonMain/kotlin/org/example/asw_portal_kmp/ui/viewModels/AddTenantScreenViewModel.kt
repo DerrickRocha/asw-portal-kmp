@@ -12,8 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
 import org.example.asw_portal_kmp.network.api.tenants.AddTenantResponse
-import org.example.asw_portal_kmp.network.api.tenants.Result
-import org.example.asw_portal_kmp.network.api.tenants.Tenant
+import org.example.asw_portal_kmp.network.api.tenants.RepositoryResult
 import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
 
 class AddTenantScreenViewModel(
@@ -108,13 +107,13 @@ class AddTenantScreenViewModel(
                 )
 
                 when (result) {
-                    is Result.Failure -> {
+                    is RepositoryResult.Failure -> {
                         _state.value = _state.value.copy(
                             isLoading = false,
                             generalError = result.message
                         )
                     }
-                    is Result.Success<AddTenantResponse> -> {
+                    is RepositoryResult.Success<AddTenantResponse> -> {
                         val response = result.data
                         _state.value = _state.value.copy(
                             isLoading = false,
