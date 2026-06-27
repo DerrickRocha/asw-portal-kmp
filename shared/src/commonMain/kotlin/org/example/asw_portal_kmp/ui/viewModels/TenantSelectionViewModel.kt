@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
 import org.example.asw_portal_kmp.data.KeyValuePairManager
-import org.example.asw_portal_kmp.network.api.tenants.Result
+import org.example.asw_portal_kmp.network.api.RepositoryResult
 import org.example.asw_portal_kmp.network.api.tenants.Tenant
 import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
 
@@ -43,11 +43,11 @@ class TenantSelectionViewModel(
             try {
                 val result = repository.getTenants()
                 when(result) {
-                    is Result.Failure -> _state.value = _state.value.copy(
+                    is RepositoryResult.Failure -> _state.value = _state.value.copy(
                         error = result.message,
                         isLoading = false
                     )
-                    is Result.Success<List<Tenant>> -> _state.value = _state.value.copy(
+                    is RepositoryResult.Success<List<Tenant>> -> _state.value = _state.value.copy(
                         tenants = result.data,
                         isLoading = false
                     )

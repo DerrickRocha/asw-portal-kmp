@@ -18,6 +18,7 @@ import androidx.navigation3.ui.NavDisplay
 import org.example.asw_portal_kmp.Dependencies.kvManager
 import org.example.asw_portal_kmp.navigation.Route
 import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack
+import org.example.asw_portal_kmp.ui.screens.AddTenantScreen
 import org.example.asw_portal_kmp.ui.screens.LoginScreen
 import org.example.asw_portal_kmp.ui.screens.PinScreen
 import org.example.asw_portal_kmp.ui.screens.SignupScreen
@@ -36,6 +37,7 @@ fun App() {
             AppViewModel(keyValuePairManager = kvManager)
         }
         val backStack = rememberECommerceNavBackStack(Route.Splash)
+        var refreshTrigger by remember { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
             viewModel.effects.collect { effect ->
@@ -119,8 +121,18 @@ fun App() {
                                         backStack.clear()
                                         backStack.add(Route.TenantConsole(tenantId))
                                     },
-                                    onNavigateToCreateTenant = { backStack.add(Route.CreateTenant) })
+                                    onNavigateToCreateTenant = { backStack.add(Route.CreateTenant) },
+                                    refreshTrigger = refreshTrigger
+                                )
                             })
+
+                        Route.CreateTenant -> NavEntry(key = key, content = {
+                            AddTenantScreen(
+                                onContinueClicked = {
+                                    refreshTrigger = !refreshTrigger
+                                    backStack.removeLast()
+                                })
+                        })
 
                         is Route.TenantConsole -> NavEntry(key = key, content = { Text("Tenant Console") })
                         else -> NavEntry(key = key, content = { Text("Unknown") })
