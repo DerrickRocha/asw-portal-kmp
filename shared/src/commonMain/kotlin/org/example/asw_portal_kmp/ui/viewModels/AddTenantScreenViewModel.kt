@@ -17,7 +17,7 @@ import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
 
 class AddTenantScreenViewModel(
     private val repository: TenantsRepository = Dependencies.tenantsRepository,
-): ViewModel() {
+) : ViewModel() {
 
     private val _state = MutableStateFlow(AddTenantState())
     val state: StateFlow<AddTenantState> = _state.asStateFlow()
@@ -80,6 +80,13 @@ class AddTenantScreenViewModel(
             return
         }
 
+        if (currentState.domain.length > 63) {
+            _state.value = currentState.copy(
+                domainError = "Subdomain must be less than 63 characters"
+            )
+            return
+        }
+
         if (currentState.customDomain.isNotBlank() && !isValidDomain(currentState.customDomain)) {
             _state.value = currentState.copy(
                 customDomainError = "Please enter a valid domain (e.g., portal.mycompany.com)"
@@ -91,7 +98,11 @@ class AddTenantScreenViewModel(
         createTenantJob = viewModelScope.launch {
             _state.value = currentState.copy(
                 isLoading = true,
-                generalError = null
+                generalError = null,
+                nameError = null,
+                domainError = null,
+                customDomainError = null,
+                isSuccess = false,
             )
 
             try {
@@ -108,6 +119,7 @@ class AddTenantScreenViewModel(
                             generalError = result.message
                         )
                     }
+
                     is RepositoryResult.Success<AddTenantResponse> -> {
                         _state.value = _state.value.copy(
                             isLoading = false,
@@ -123,6 +135,11 @@ class AddTenantScreenViewModel(
                 )
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        createTenantJob?.cancel()
     }
 }
 
