@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
+import org.example.asw_portal_kmp.network.api.RepositoryResult
 import org.example.asw_portal_kmp.network.api.tenants.AddTenantResponse
-import org.example.asw_portal_kmp.network.api.tenants.RepositoryResult
 import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
 
 class AddTenantScreenViewModel(
@@ -23,11 +23,6 @@ class AddTenantScreenViewModel(
     val state: StateFlow<AddTenantState> = _state.asStateFlow()
 
     private var createTenantJob: Job? = null
-    private val _events = MutableSharedFlow<AddTenantEvent>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val events = _events.asSharedFlow()
 
     fun updateName(name: String) {
         _state.value = _state.value.copy(
@@ -114,13 +109,11 @@ class AddTenantScreenViewModel(
                         )
                     }
                     is RepositoryResult.Success<AddTenantResponse> -> {
-                        val response = result.data
                         _state.value = _state.value.copy(
                             isLoading = false,
                             generalError = null,
                             isSuccess = true,
                         )
-                        _events.emit(AddTenantEvent.TenantCreated(response.tenantId))
                     }
                 }
             } catch (e: Exception) {
@@ -145,7 +138,3 @@ data class AddTenantState(
     val snackbarMessage: String? = null,
     val isSuccess: Boolean = false,
 )
-
-sealed class AddTenantEvent {
-    data class TenantCreated(val tenantId: Int) : AddTenantEvent()
-}

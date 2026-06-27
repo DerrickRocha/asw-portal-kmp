@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
 import org.example.asw_portal_kmp.data.KeyValuePairManager
-import org.example.asw_portal_kmp.network.api.tenants.RepositoryResult
+import org.example.asw_portal_kmp.network.api.RepositoryResult
 import org.example.asw_portal_kmp.network.api.tenants.Tenant
 import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
 
