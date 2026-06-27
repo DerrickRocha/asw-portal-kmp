@@ -98,7 +98,6 @@ fun AddTenantScreenContent(
                     modifier = Modifier.padding(bottom = 32.dp)
                 )
 
-                // Manual continue button
                 Button(
                     onClick = onContinueClicked,
                     modifier = Modifier
@@ -123,7 +122,6 @@ fun AddTenantScreenContent(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                // Tenant Name Field
                 OutlinedTextField(
                     value = state.name,
                     onValueChange = onNameChange,
@@ -157,7 +155,6 @@ fun AddTenantScreenContent(
                     }
                 )
 
-                // Domain Field
                 OutlinedTextField(
                     value = state.domain,
                     onValueChange = onDomainChange,
@@ -182,7 +179,6 @@ fun AddTenantScreenContent(
                     }
                 )
 
-                // Custom Domain Field (Optional)
                 OutlinedTextField(
                     value = state.customDomain,
                     onValueChange = onCustomDomainChange,
@@ -209,7 +205,6 @@ fun AddTenantScreenContent(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Error Message
                 if (state.generalError != null) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -240,7 +235,6 @@ fun AddTenantScreenContent(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Submit Button
                 Button(
                     onClick = onSubmit,
                     modifier = Modifier
@@ -274,7 +268,6 @@ fun AddTenantScreenContent(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Info Section
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
