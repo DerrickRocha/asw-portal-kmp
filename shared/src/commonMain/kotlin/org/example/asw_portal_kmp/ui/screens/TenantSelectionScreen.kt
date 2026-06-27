@@ -49,7 +49,8 @@ import org.example.asw_portal_kmp.utils.DateUtils
 @Composable
 fun TenantSelectionScreen(
     onNavigateToTenantConsole: (Int) -> Unit,
-    onNavigateToCreateTenant: () -> Unit
+    onNavigateToCreateTenant: () -> Unit,
+    refreshTrigger: Boolean = false
 ) {
     val viewModel: TenantSelectionViewModel = viewModel {
         TenantSelectionViewModel()
@@ -57,7 +58,8 @@ fun TenantSelectionScreen(
 
     val state by viewModel.state.collectAsState()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshTrigger) {
+        viewModel.loadTenants()
         viewModel.events.collect { event ->
             when (event) {
                 is TenantSelectionEvent.NavigateToTenantConsole -> {

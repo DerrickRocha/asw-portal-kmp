@@ -37,6 +37,7 @@ fun App() {
             AppViewModel(keyValuePairManager = kvManager)
         }
         val backStack = rememberECommerceNavBackStack(Route.Splash)
+        var refreshTrigger by remember { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
             viewModel.effects.collect { effect ->
@@ -120,12 +121,17 @@ fun App() {
                                         backStack.clear()
                                         backStack.add(Route.TenantConsole(tenantId))
                                     },
-                                    onNavigateToCreateTenant = { backStack.add(Route.CreateTenant) })
+                                    onNavigateToCreateTenant = { backStack.add(Route.CreateTenant) },
+                                    refreshTrigger = refreshTrigger
+                                )
                             })
+
                         Route.CreateTenant -> NavEntry(key = key, content = {
-                            AddTenantScreen(onContinueClicked = {
-                                backStack.removeLast()
-                            })
+                            AddTenantScreen(
+                                onContinueClicked = {
+                                    refreshTrigger = !refreshTrigger
+                                    backStack.removeLast()
+                                })
                         })
 
                         is Route.TenantConsole -> NavEntry(key = key, content = { Text("Tenant Console") })
