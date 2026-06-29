@@ -28,16 +28,14 @@ class KeyValuePairManagerImplementation(
         // Preference keys
         private val KEY_ID_TOKEN = stringPreferencesKey("id_token")
         private val KEY_TENANT_ID = intPreferencesKey("tenant_id")
-
-        // Header names
-        private const val HEADER_AUTHORIZATION = "Authorization"
-        private const val HEADER_TENANT_ID = "X-Tenant-Id"
-        private const val TOKEN_PREFIX = "Bearer "
     }
 
     override val isLoggedIn: Flow<Boolean>
         get() = store.data.map { preferences ->
-            preferences[KEY_ID_TOKEN].isNullOrBlank().not()
+            val token = preferences[KEY_ID_TOKEN]
+            if (token.isNullOrBlank()) return@map false
+            val decryptedToken = encryptor.decrypt(token)
+            decryptedToken.isNotBlank()
         }
 
     override suspend fun getIdToken(): String? {
