@@ -17,12 +17,7 @@ class AppViewModel(private val keyValuePairManager: KeyValuePairManager) : ViewM
         viewModelScope.launch {
             keyValuePairManager.isLoggedIn.collect { isLoggedIn ->
                 if (isLoggedIn) {
-                    val tenantId = keyValuePairManager.getTenantId()
-                    if (tenantId != null && tenantId > 0) {
-                        _effects.emit(AppEffects.NavigateToTenantConsole(tenantId))
-                    } else {
-                        _effects.emit(AppEffects.NavigateToTenantSelection)
-                    }
+                    _effects.emit(AppEffects.NavigateToTenantSelection)
                 } else {
                     _effects.emit(AppEffects.NavigateToLogin)
                 }
@@ -34,5 +29,4 @@ class AppViewModel(private val keyValuePairManager: KeyValuePairManager) : ViewM
 sealed interface AppEffects {
     data object NavigateToLogin : AppEffects
     data object NavigateToTenantSelection : AppEffects
-    data class NavigateToTenantConsole(val tenantId: Int) : AppEffects
 }

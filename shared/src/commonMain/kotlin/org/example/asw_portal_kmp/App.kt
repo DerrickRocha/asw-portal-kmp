@@ -17,7 +17,9 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import org.example.asw_portal_kmp.Dependencies.kvManager
 import org.example.asw_portal_kmp.navigation.Route
+import org.example.asw_portal_kmp.navigation.TenantRoute
 import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack
+import org.example.asw_portal_kmp.navigation.rememberTenantNavBackStack
 import org.example.asw_portal_kmp.ui.screens.AddTenantScreen
 import org.example.asw_portal_kmp.ui.screens.LoginScreen
 import org.example.asw_portal_kmp.ui.screens.PinScreen
@@ -37,7 +39,6 @@ fun App() {
             AppViewModel(keyValuePairManager = kvManager)
         }
         val backStack = rememberECommerceNavBackStack(Route.Splash)
-        var refreshTrigger by remember { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
             viewModel.effects.collect { effect ->
@@ -45,11 +46,6 @@ fun App() {
                     is AppEffects.NavigateToLogin -> {
                         backStack.clear()
                         backStack.add(Route.Login)
-                    }
-
-                    is AppEffects.NavigateToTenantConsole -> {
-                        backStack.clear()
-                        backStack.add(Route.TenantConsole(effect.tenantId))
                     }
 
                     AppEffects.NavigateToTenantSelection -> {
@@ -116,29 +112,55 @@ fun App() {
                         Route.TenantSelection -> NavEntry(
                             key = key,
                             content = {
-                                TenantSelectionScreen(
-                                    onNavigateToTenantConsole = { tenantId ->
-                                        backStack.clear()
-                                        backStack.add(Route.TenantConsole(tenantId))
-                                    },
-                                    onNavigateToCreateTenant = { backStack.add(Route.CreateTenant) },
-                                    refreshTrigger = refreshTrigger
-                                )
+                                TenantNavDisplay()
                             })
 
-                        Route.CreateTenant -> NavEntry(key = key, content = {
-                            AddTenantScreen(
-                                onContinueClicked = {
-                                    refreshTrigger = !refreshTrigger
-                                    backStack.removeLast()
-                                })
-                        })
-
-                        is Route.TenantConsole -> NavEntry(key = key, content = { Text("Tenant Console") })
                         else -> NavEntry(key = key, content = { Text("Unknown") })
                     }
                 }
             )
         }
     }
+}
+
+@Composable
+fun TenantNavDisplay() {
+
+    val tenantsBackstack = rememberTenantNavBackStack(TenantRoute.TenantSelection)
+    var refreshTrigger by remember { mutableStateOf(false) }
+
+    NavDisplay(
+        backStack = tenantsBackstack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = { tenantKey ->
+            when(tenantKey) {
+                is TenantRoute.TenantSelection -> NavEntry(
+                    key = tenantKey,
+                    content = {
+                        TenantSelectionScreen(
+                            onNavigateToTenantConsole = { tenantId ->
+                                //tenantsBackstack.clear()
+                                tenantsBackstack.add(TenantRoute.TenantConsole(tenantId))
+                            },
+                            onNavigateToCreateTenant = { tenantsBackstack.add(TenantRoute.CreateTenant) },
+                            refreshTrigger = refreshTrigger
+                        )
+                    }
+                )
+                TenantRoute.CreateTenant -> NavEntry(key = tenantKey, content = {
+                    AddTenantScreen(
+                        onContinueClicked = {
+                            refreshTrigger = !refreshTrigger
+                            tenantsBackstack.removeLast()
+                        })
+                })
+                is TenantRoute.TenantConsole -> NavEntry(key = tenantKey, content = { Text("Tenant Console") })
+
+                else -> NavEntry(key = tenantKey, content = { Text("Unknown") })
+            }
+        }
+    )
 }

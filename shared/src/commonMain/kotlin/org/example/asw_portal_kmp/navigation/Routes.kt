@@ -24,29 +24,14 @@ sealed interface Route: NavKey {
     @Serializable
     data class PinScreen(val email: String): Route
 
-    @Serializable
-    data object TenantSelection: Route
-    @Serializable
-    data class TenantConsole(val tenantId: Int): Route
-    @Serializable
-    data object Products: Route
-    @Serializable
-    data class ProductDetails(val productId: Int): Route
-    @Serializable
-    data object Orders: Route
-    @Serializable
-    data class OrderDetails(val orderId: Int): Route
-    @Serializable
-    data object Inventories: Route
-    @Serializable
-    data class InventoryItemDetails(val inventoryId: Int): Route
 
     @Serializable
-    data object CreateTenant: Route
+    data object TenantSelection: Route
+
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-val navigationConfig: SavedStateConfiguration
+private val navigationConfig: SavedStateConfiguration
     get() = SavedStateConfiguration {
         serializersModule = SerializersModule {
             polymorphic(NavKey::class) {
