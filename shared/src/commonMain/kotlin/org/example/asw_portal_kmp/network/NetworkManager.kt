@@ -269,8 +269,10 @@ class NetworkManagerImplementation(
                     val statusCode = response.status.value
                     val errorBody = response.bodyAsText()
                     if (statusCode == 401) {
-                        manager.saveIdToken("")
-                        manager.saveTenantId(-1)
+                        if(manager.isLoggedIn.first()) {
+                            manager.saveIdToken("")
+                            manager.saveTenantId(-1)
+                        }
                     }
                     NetworkResult.Error(
                         message = "HTTP $statusCode: ${response.status.description}",
