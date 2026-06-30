@@ -11,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
+import kotlinx.coroutines.flow.first
 import kotlinx.io.IOException
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -255,8 +256,10 @@ class NetworkManagerImplementation(
         } catch (e: Exception) {
             when (e) {
                 is AuthenticationException -> {
-                    manager.saveIdToken("")
-                    manager.saveTenantId(-1)
+                    if(manager.isLoggedIn.first()) {
+                        manager.saveIdToken("")
+                        manager.saveTenantId(-1)
+                    }
                     NetworkResult.Error(e.message ?: "Auth error")
                 }
                 is TenantException -> NetworkResult.Error(e.message ?: "Auth error")
