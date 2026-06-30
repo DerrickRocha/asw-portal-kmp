@@ -2,6 +2,7 @@ package org.example.asw_portal_kmp.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.ktor.utils.io.ioDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -22,6 +23,12 @@ class AppViewModel(private val keyValuePairManager: KeyValuePairManager) : ViewM
                     _effects.emit(AppEffects.NavigateToLogin)
                 }
             }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch(ioDispatcher()) {
+            keyValuePairManager.clear()
         }
     }
 }

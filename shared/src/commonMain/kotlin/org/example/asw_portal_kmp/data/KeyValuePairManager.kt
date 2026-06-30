@@ -17,6 +17,8 @@ interface KeyValuePairManager {
     suspend fun getTenantId(): Int?
     suspend fun saveIdToken(token: String)
     suspend fun saveTenantId(tenantId: Int)
+
+    suspend fun clear()
 }
 
 class KeyValuePairManagerImplementation(
@@ -63,5 +65,10 @@ class KeyValuePairManagerImplementation(
         store.edit { preferences ->
             preferences[KEY_TENANT_ID] = tenantId
         }
+    }
+
+    override suspend fun clear() {
+        saveIdToken("")
+        saveTenantId(-1)
     }
 }

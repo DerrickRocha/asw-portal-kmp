@@ -257,8 +257,7 @@ class NetworkManagerImplementation(
             when (e) {
                 is AuthenticationException -> {
                     if(manager.isLoggedIn.first()) {
-                        manager.saveIdToken("")
-                        manager.saveTenantId(-1)
+                        manager.clear()
                     }
                     NetworkResult.Error(e.message ?: "Auth error")
                 }

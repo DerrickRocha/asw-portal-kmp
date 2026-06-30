@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Menu
@@ -21,7 +20,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -58,13 +56,11 @@ import org.example.asw_portal_kmp.ui.viewModels.AppEffects
 import org.example.asw_portal_kmp.ui.viewModels.AppViewModel
 import kotlin.collections.listOf
 
-
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
         val viewModel: AppViewModel = viewModel {
-
             AppViewModel(keyValuePairManager = kvManager)
         }
         val backStack = rememberECommerceNavBackStack(Route.Splash)
@@ -141,7 +137,7 @@ fun App() {
                         Route.TenantSelection -> NavEntry(
                             key = key,
                             content = {
-                                TenantNavDisplay()
+                                TenantNavDisplay(viewModel::logout)
                             })
 
                         else -> NavEntry(key = key, content = { Text("Unknown") })
@@ -153,7 +149,7 @@ fun App() {
 }
 
 @Composable
-fun TenantNavDisplay() {
+fun TenantNavDisplay(onLogoutClick: () -> Unit) {
 
     val tenantsBackstack = rememberTenantNavBackStack(TenantRoute.TenantSelection)
     var refreshTrigger by remember { mutableStateOf(false) }
@@ -161,10 +157,6 @@ fun TenantNavDisplay() {
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
-    val onLogoutClick: () -> Unit = {
-
-    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -377,6 +369,5 @@ fun TenantNavDisplay() {
             )
         }
     }
-
 
 }
