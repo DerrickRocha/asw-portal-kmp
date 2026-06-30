@@ -17,6 +17,8 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -151,6 +153,7 @@ class NetworkManagerTest {
     fun testGetWithMissingAuthToken() = runTest {
         // Given
         everySuspend { mockKeyValueManager.getIdToken() } returns null
+        everySuspend { mockKeyValueManager.isLoggedIn } returns flowOf(false)
 
         // When
         val result = networkManager.get<TestUser>(
@@ -509,7 +512,7 @@ class NetworkManagerTest {
     @Test
     fun testGetJsonConvenienceMethod() = runTest {
         // When
-        val result = networkManager.getJson<TestUser, TestUser>(
+        val result = networkManager.getJson<TestUser>(
             url = "https://api.example.com/users/1"
         )
 
