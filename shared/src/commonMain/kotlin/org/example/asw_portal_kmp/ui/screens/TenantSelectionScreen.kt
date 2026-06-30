@@ -72,8 +72,6 @@ fun TenantSelectionScreen(
         TenantSelectionViewModel()
     }
 
-    val onLogoutClick: () -> Unit = {}
-
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(refreshTrigger) {
@@ -92,7 +90,6 @@ fun TenantSelectionScreen(
         onTenantSelected = viewModel::selectTenant,
         onCreateTenantClick = onNavigateToCreateTenant,
         onRetryClick = viewModel::retry,
-        onLogoutClick = onLogoutClick
     )
 }
 
@@ -102,216 +99,51 @@ fun TenantSelectionScreenContent(
     onTenantSelected: (Tenant) -> Unit,
     onCreateTenantClick: () -> Unit,
     onRetryClick: () -> Unit,
-    onLogoutClick: () -> Unit = {}
 ) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet {
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(12.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "A",
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text(
-                        text = "Agile Southwest Portal",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    Text(
-                        text = "Tenant Management",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Divider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onCreateTenantClick,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier
+                    .size(56.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Create Tenant"
                 )
-
-                // Drawer Items
-                NavigationDrawerItem(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Business,
-                            contentDescription = "Tenants"
-                        )
-                    },
-                    label = { Text("Tenants") },
-                    selected = true,
-                    onClick = {
-                        scope.launch {
-                            drawerState.close()
-                        }
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-
-                NavigationDrawerItem(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Profile"
-                        )
-                    },
-                    label = { Text("Profile") },
-                    selected = false,
-                    onClick = {
-                        scope.launch {
-                            drawerState.close()
-                            // Navigate to profile
-                        }
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-
-                NavigationDrawerItem(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
-                        )
-                    },
-                    label = { Text("Settings") },
-                    selected = false,
-                    onClick = {
-                        scope.launch {
-                            drawerState.close()
-                            // Navigate to settings
-                        }
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Divider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant
-                )
-
-                // Logout Item
-                NavigationDrawerItem(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Logout,
-                            contentDescription = "Logout",
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = "Logout",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    },
-                    selected = false,
-                    onClick = {
-                        scope.launch {
-                            drawerState.close()
-                            // Call logout callback after drawer closes
-                            onLogoutClick()
-                        }
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    colors = NavigationDrawerItemDefaults.colors(
-                        selectedTextColor = MaterialTheme.colorScheme.error,
-                        selectedIconColor = MaterialTheme.colorScheme.error,
-                        unselectedTextColor = MaterialTheme.colorScheme.error,
-                        unselectedIconColor = MaterialTheme.colorScheme.error
-                    )
-                )
-
             }
         }
-    ) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Select Tenant") },
-                    navigationIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            modifier = Modifier.clickable {
-                                scope.launch {
-                                    drawerState.apply {
-                                        if (isClosed) open() else close()
-                                    }
-                                }
-                            },
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                )
-            },
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = onCreateTenantClick,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier
-                        .size(56.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Create Tenant"
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when {
+                state.isLoading -> {
+                    LoadingContent()
+                }
+
+                state.error != null -> {
+                    ErrorContent(
+                        error = state.error,
+                        onRetry = onRetryClick
                     )
                 }
-            }
-        ) { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                when {
-                    state.isLoading -> {
-                        LoadingContent()
-                    }
 
-                    state.error != null -> {
-                        ErrorContent(
-                            error = state.error,
-                            onRetry = onRetryClick
-                        )
-                    }
+                state.tenants.isEmpty() -> {
+                    EmptyContent(
+                        onCreateTenant = onCreateTenantClick
+                    )
+                }
 
-                    state.tenants.isEmpty() -> {
-                        EmptyContent(
-                            onCreateTenant = onCreateTenantClick
-                        )
-                    }
-
-                    else -> {
-                        TenantListContent(
-                            tenants = state.tenants,
-                            onTenantSelected = onTenantSelected
-                        )
-                    }
+                else -> {
+                    TenantListContent(
+                        tenants = state.tenants,
+                        onTenantSelected = onTenantSelected
+                    )
                 }
             }
         }
