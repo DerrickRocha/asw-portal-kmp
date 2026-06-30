@@ -162,7 +162,9 @@ fun TenantNavDisplay() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    val onLogoutClick: () -> Unit = {}
+    val onLogoutClick: () -> Unit = {
+
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -218,7 +220,7 @@ fun TenantNavDisplay() {
                         )
                     },
                     label = { Text("Tenants") },
-                    selected = true,
+                    selected = tenantsBackstack.lastOrNull() is TenantRoute.TenantSelection,
                     onClick = {
                         scope.launch {
                             drawerState.close()
@@ -235,7 +237,7 @@ fun TenantNavDisplay() {
                         )
                     },
                     label = { Text("Profile") },
-                    selected = false,
+                    selected = tenantsBackstack.lastOrNull() is TenantRoute.Profile,
                     onClick = {
                         scope.launch {
                             drawerState.close()
@@ -253,7 +255,7 @@ fun TenantNavDisplay() {
                         )
                     },
                     label = { Text("Settings") },
-                    selected = false,
+                    selected = tenantsBackstack.lastOrNull() is TenantRoute.Settings,
                     onClick = {
                         scope.launch {
                             drawerState.close()
