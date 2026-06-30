@@ -1,6 +1,7 @@
 package org.example.asw_portal_kmp.network
 
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.header
 import io.ktor.client.request.request
@@ -10,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
+import kotlinx.coroutines.flow.first
 import kotlinx.io.IOException
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -253,8 +255,31 @@ class NetworkManagerImplementation(
             }
         } catch (e: Exception) {
             when (e) {
-                is AuthenticationException, is TenantException -> NetworkResult.Error(e.message ?: "Auth error")
+                is AuthenticationException -> {
+                    if(manager.isLoggedIn.first()) {
+                        manager.saveIdToken("")
+                        manager.saveTenantId(-1)
+                    }
+                    NetworkResult.Error(e.message ?: "Auth error")
+                }
+                is TenantException -> NetworkResult.Error(e.message ?: "Auth error")
                 is JsonDecodingException -> NetworkResult.Exception(JsonParsingException(e.message ?: "JSON parsing error", e))
+                is ClientRequestException -> {
+                    val response = e.response
+                    val statusCode = response.status.value
+                    val errorBody = response.bodyAsText()
+                    if (statusCode == 401) {
+                        if(manager.isLoggedIn.first()) {
+                            manager.saveIdToken("")
+                            manager.saveTenantId(-1)
+                        }
+                    }
+                    NetworkResult.Error(
+                        message = "HTTP $statusCode: ${response.status.description}",
+                        statusCode = statusCode,
+                        errorBody = errorBody
+                    )
+                }
                 else -> NetworkResult.Exception(e)
             }
         }
