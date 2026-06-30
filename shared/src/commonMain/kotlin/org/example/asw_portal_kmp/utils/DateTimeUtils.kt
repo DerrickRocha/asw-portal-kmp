@@ -1,5 +1,12 @@
 package org.example.asw_portal_kmp.utils
 
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+
 object DateUtils {
 
     // Parse ISO 8601 format: "2026-06-06T02:48:41.398246"
@@ -128,22 +135,21 @@ object DateUtils {
         val second: Int
     )
 
-    // Get current date/time (simplified for demo)
     private fun getCurrentDateTime(): DateTimeComponents {
-        // In a real app, you'd use a platform-specific implementation
-        // For now, we'll use a fixed date or implement platform-specific
-        // For desktop, you can use Java's LocalDateTime
-        // For Android, you can use Calendar
-        // For iOS, you can use NSDate
-
-        // This is a simplified version - you'd want to use platform-specific
-        return DateTimeComponents(2026, 6, 6, 14, 30, 0)
+        val currentMoment: Instant = kotlin.time.Clock.System.now()
+        val datetimeInSystemZone: LocalDateTime = currentMoment.toLocalDateTime(TimeZone.currentSystemDefault())
+        return DateTimeComponents(datetimeInSystemZone.year, datetimeInSystemZone.month.number, datetimeInSystemZone.day, datetimeInSystemZone.hour, datetimeInSystemZone.minute, datetimeInSystemZone.second)
     }
 
     // Calculate difference in seconds between two DateTimes
     private fun calculateDifference(now: DateTimeComponents, then: DateTimeComponents): Long {
-        // Simplified calculation - in production, use platform-specific date handling
-        // For now, return a reasonable value for demo purposes
-        return 7200L // 2 hours
+        val nowLocal = LocalDateTime(now.year, now.month, now.day, now.hour, now.minute, now.second)
+        val thenLocal = LocalDateTime(then.year, then.month, then.day, then.hour, then.minute, then.second)
+
+        // Calculate difference in seconds
+        val duration = nowLocal.toInstant(TimeZone.currentSystemDefault()) -
+                thenLocal.toInstant(TimeZone.currentSystemDefault())
+
+        return kotlin.math.abs(duration.inWholeSeconds)
     }
 }
