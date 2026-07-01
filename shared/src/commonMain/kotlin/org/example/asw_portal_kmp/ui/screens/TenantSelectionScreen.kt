@@ -1,6 +1,7 @@
 package org.example.asw_portal_kmp.ui.screens
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,31 +16,46 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.network.api.tenants.Tenant
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionEvent
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionState
@@ -50,7 +66,7 @@ import org.example.asw_portal_kmp.utils.DateUtils
 fun TenantSelectionScreen(
     onNavigateToTenantConsole: (Int) -> Unit,
     onNavigateToCreateTenant: () -> Unit,
-    refreshTrigger: Boolean = false
+    refreshTrigger: Boolean = false,
 ) {
     val viewModel: TenantSelectionViewModel = viewModel {
         TenantSelectionViewModel()
@@ -73,7 +89,7 @@ fun TenantSelectionScreen(
         state = state,
         onTenantSelected = viewModel::selectTenant,
         onCreateTenantClick = onNavigateToCreateTenant,
-        onRetryClick = viewModel::retry
+        onRetryClick = viewModel::retry,
     )
 }
 
@@ -82,7 +98,7 @@ fun TenantSelectionScreenContent(
     state: TenantSelectionState,
     onTenantSelected: (Tenant) -> Unit,
     onCreateTenantClick: () -> Unit,
-    onRetryClick: () -> Unit
+    onRetryClick: () -> Unit,
 ) {
     Scaffold(
         floatingActionButton = {
@@ -132,6 +148,7 @@ fun TenantSelectionScreenContent(
             }
         }
     }
+
 }
 
 @Composable

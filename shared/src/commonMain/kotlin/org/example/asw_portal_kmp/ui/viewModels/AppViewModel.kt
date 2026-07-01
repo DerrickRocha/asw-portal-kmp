@@ -2,6 +2,7 @@ package org.example.asw_portal_kmp.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.ktor.utils.io.ioDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -17,16 +18,17 @@ class AppViewModel(private val keyValuePairManager: KeyValuePairManager) : ViewM
         viewModelScope.launch {
             keyValuePairManager.isLoggedIn.collect { isLoggedIn ->
                 if (isLoggedIn) {
-                    val tenantId = keyValuePairManager.getTenantId()
-                    if (tenantId != null && tenantId > 0) {
-                        _effects.emit(AppEffects.NavigateToTenantConsole(tenantId))
-                    } else {
-                        _effects.emit(AppEffects.NavigateToTenantSelection)
-                    }
+                    _effects.emit(AppEffects.NavigateToTenantSelection)
                 } else {
                     _effects.emit(AppEffects.NavigateToLogin)
                 }
             }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch(ioDispatcher()) {
+            keyValuePairManager.clear()
         }
     }
 }
@@ -34,5 +36,4 @@ class AppViewModel(private val keyValuePairManager: KeyValuePairManager) : ViewM
 sealed interface AppEffects {
     data object NavigateToLogin : AppEffects
     data object NavigateToTenantSelection : AppEffects
-    data class NavigateToTenantConsole(val tenantId: Int) : AppEffects
 }
