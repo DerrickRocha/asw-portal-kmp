@@ -71,6 +71,10 @@ class TenantSelectionViewModel(
     fun retry() {
         loadTenants()
     }
+
+    fun deleteTenant(tenantId: Int) {
+
+    }
 }
 
 data class TenantSelectionState(

@@ -337,6 +337,7 @@ fun TenantNavDisplay(onLogoutClick: () -> Unit) {
                                             tenantsBackstack.add(TenantRoute.TenantConsole(tenantId))
                                         },
                                         onNavigateToCreateTenant = { tenantsBackstack.add(TenantRoute.CreateTenant) },
+                                        onNavigateToEditTenant = { tenant -> },
                                         refreshTrigger = refreshTrigger
                                     )
                                 }

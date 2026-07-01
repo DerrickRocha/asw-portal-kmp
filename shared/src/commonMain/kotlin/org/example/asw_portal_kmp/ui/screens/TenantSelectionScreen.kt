@@ -18,28 +18,39 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.network.api.tenants.Tenant
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionEvent
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionState
@@ -50,6 +61,7 @@ import org.example.asw_portal_kmp.utils.DateUtils
 fun TenantSelectionScreen(
     onNavigateToTenantConsole: (Int) -> Unit,
     onNavigateToCreateTenant: () -> Unit,
+    onNavigateToEditTenant: (Tenant) -> Unit, // New callback
     refreshTrigger: Boolean = false,
 ) {
     val viewModel: TenantSelectionViewModel = viewModel {
@@ -57,6 +69,7 @@ fun TenantSelectionScreen(
     }
 
     val state by viewModel.state.collectAsState()
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(refreshTrigger) {
         viewModel.loadTenants()
@@ -72,6 +85,16 @@ fun TenantSelectionScreen(
     TenantSelectionScreenContent(
         state = state,
         onTenantSelected = viewModel::selectTenant,
+        onDeleteTenant = { tenant ->
+            scope.launch {
+                // Show confirmation dialog
+                // This could be handled in a separate composable
+                viewModel.deleteTenant(tenant.tenantId)
+            }
+        },
+        onEditTenant = { tenant ->
+            onNavigateToEditTenant(tenant)
+        },
         onCreateTenantClick = onNavigateToCreateTenant,
         onRetryClick = viewModel::retry,
     )
@@ -81,9 +104,14 @@ fun TenantSelectionScreen(
 fun TenantSelectionScreenContent(
     state: TenantSelectionState,
     onTenantSelected: (Tenant) -> Unit,
+    onDeleteTenant: (Tenant) -> Unit,
+    onEditTenant: (Tenant) -> Unit,
     onCreateTenantClick: () -> Unit,
     onRetryClick: () -> Unit,
 ) {
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var tenantToDelete by remember { mutableStateOf<Tenant?>(null) }
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -126,29 +154,79 @@ fun TenantSelectionScreenContent(
                 else -> {
                     TenantListContent(
                         tenants = state.tenants,
-                        onTenantSelected = onTenantSelected
+                        onTenantSelected = onTenantSelected,
+                        onDeleteTenant = { tenant ->
+                            tenantToDelete = tenant
+                            showDeleteConfirmation = true
+                        },
+                        onEditTenant = onEditTenant
                     )
                 }
             }
         }
     }
-
+    // Delete Confirmation Dialog
+    if (showDeleteConfirmation && tenantToDelete != null) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteConfirmation = false
+                tenantToDelete = null
+            },
+            title = {
+                Text("Delete Tenant")
+            },
+            text = {
+                Text("Are you sure you want to delete \"${tenantToDelete?.name}\"? This action cannot be undone.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        tenantToDelete?.let { onDeleteTenant(it) }
+                        showDeleteConfirmation = false
+                        tenantToDelete = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirmation = false
+                        tenantToDelete = null
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 @Composable
 fun TenantListContent(
     tenants: List<Tenant>,
-    onTenantSelected: (Tenant) -> Unit
+    onTenantSelected: (Tenant) -> Unit,
+    onDeleteTenant: (Tenant) -> Unit,
+    onEditTenant: (Tenant) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(tenants) { tenant ->
+        items(
+            items = tenants,
+            key = { it.tenantId }
+        ) { tenant ->
             TenantListItem(
                 tenant = tenant,
-                onClick = { onTenantSelected(tenant) }
+                onClick = { onTenantSelected(tenant) },
+                onDelete = { onDeleteTenant(tenant) },
+                onEdit = { onEditTenant(tenant) }
             )
         }
     }
@@ -157,7 +235,9 @@ fun TenantListContent(
 @Composable
 fun TenantListItem(
     tenant: Tenant,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -174,53 +254,96 @@ fun TenantListItem(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text(
-                text = tenant.name,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
+            // Main content with click
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onClick),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                Icon(
-                    imageVector = Icons.Default.Language,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                val customDomain = if (tenant.customDomain.isNullOrBlank()) tenant.subDomain else tenant.customDomain
-                Text(
-                    text = "${customDomain}.agilesouthwest.com",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+                // Left side - Tenant info
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = tenant.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
 
-            Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Schedule,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = DateUtils.getTimeAgo(tenant.updatedAt),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Language,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        val customDomain = if (tenant.customDomain.isNullOrBlank()) tenant.subDomain else tenant.customDomain
+                        Text(
+                            text = "${customDomain}.agilesouthwest.com",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = DateUtils.getTimeAgo(tenant.updatedAt),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Right side - Action buttons
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    IconButton(
+                        onClick = onEdit,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit Tenant",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    IconButton(
+                        onClick = onDelete,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Tenant",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             }
         }
     }
@@ -352,6 +475,8 @@ fun TenantSelectionScreenPreview() {
         ),
         onTenantSelected = {},
         onCreateTenantClick = {},
-        onRetryClick = {}
+        onRetryClick = {},
+        onDeleteTenant = {},
+        onEditTenant = {}
     )
 }
