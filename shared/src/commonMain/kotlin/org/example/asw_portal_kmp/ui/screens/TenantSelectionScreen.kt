@@ -74,12 +74,12 @@ fun TenantSelectionScreen(
 
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
-
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(refreshTrigger) {
         viewModel.loadTenants()
+    }
+
+    LaunchedEffect(viewModel.events) {
         viewModel.events.collect { event ->
             when (event) {
                 is TenantSelectionEvent.NavigateToTenantConsole -> {
@@ -88,34 +88,29 @@ fun TenantSelectionScreen(
 
                 TenantSelectionEvent.DeleteTenantError -> {
 
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(
-                            message = "Failed to delete tenant",
-                            duration = SnackbarDuration.Short
-                        )
-                    }
+                    snackbarHostState.showSnackbar(
+                        message = "Failed to delete tenant",
+                        duration = SnackbarDuration.Short
+                    )
                 }
             }
         }
     }
 
+    val onTenantSelectedStable = remember(viewModel) { { tenant: Tenant -> viewModel.selectTenant(tenant) } }
+    val onDeleteTenantStable = remember(viewModel) { { tenant: Tenant -> viewModel.deleteTenant(tenant.tenantId) } }
+    val onRetryClickStable = remember(viewModel) { { viewModel.retry() } }
+    val onClearDeleteErrorStable = remember(viewModel) { { viewModel.clearDeleteError() } }
+
     TenantSelectionScreenContent(
         state = state,
         snackbarHostState = snackbarHostState,
-        onTenantSelected = viewModel::selectTenant,
-        onDeleteTenant = { tenant ->
-            scope.launch {
-                // Show confirmation dialog
-                // This could be handled in a separate composable
-                viewModel.deleteTenant(tenant.tenantId)
-            }
-        },
-        onEditTenant = { tenant ->
-            onNavigateToEditTenant(tenant)
-        },
+        onTenantSelected = onTenantSelectedStable,
+        onDeleteTenant = onDeleteTenantStable,
+        onEditTenant = onNavigateToEditTenant,
         onCreateTenantClick = onNavigateToCreateTenant,
-        onRetryClick = viewModel::retry,
-        onClearDeleteError = viewModel::clearDeleteError,
+        onRetryClick = onRetryClickStable,
+        onClearDeleteError = onClearDeleteErrorStable,
     )
 }
 
@@ -308,7 +303,8 @@ fun TenantListItem(
                             modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )
-                        val customDomain = if (tenant.customDomain.isNullOrBlank()) tenant.subDomain else tenant.customDomain
+                        val customDomain =
+                            if (tenant.customDomain.isNullOrBlank()) tenant.subDomain else tenant.customDomain
                         Text(
                             text = "${customDomain}.agilesouthwest.com",
                             style = MaterialTheme.typography.bodyMedium,
