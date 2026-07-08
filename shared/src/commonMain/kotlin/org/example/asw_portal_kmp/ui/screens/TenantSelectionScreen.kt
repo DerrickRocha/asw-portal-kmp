@@ -54,6 +54,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.network.api.tenants.Tenant
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionEvent
@@ -218,7 +220,7 @@ fun TenantSelectionScreenContent(
 
 @Composable
 fun TenantListContent(
-    tenants: List<Tenant>,
+    tenants: ImmutableList<Tenant>,
     onTenantSelected: (Tenant) -> Unit,
     onDeleteTenant: (Tenant) -> Unit,
     onEditTenant: (Tenant) -> Unit
@@ -460,7 +462,7 @@ fun EmptyContent(
 fun TenantSelectionScreenPreview() {
     TenantSelectionScreenContent(
         state = TenantSelectionState(
-            tenants = listOf(
+            tenants = persistentListOf(
                 Tenant(
                     1,
                     "Tenant 1",
