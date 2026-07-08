@@ -65,6 +65,7 @@ kotlin {
             implementation(libs.jetbrains.lifecycle.viewmodelNavigation3)
             implementation(compose.materialIconsExtended)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.collections)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

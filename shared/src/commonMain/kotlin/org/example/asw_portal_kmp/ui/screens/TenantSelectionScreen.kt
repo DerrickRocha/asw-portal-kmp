@@ -97,20 +97,14 @@ fun TenantSelectionScreen(
         }
     }
 
-    val onTenantSelectedStable = remember(viewModel) { { tenant: Tenant -> viewModel.selectTenant(tenant) } }
-    val onDeleteTenantStable = remember(viewModel) { { tenant: Tenant -> viewModel.deleteTenant(tenant.tenantId) } }
-    val onRetryClickStable = remember(viewModel) { { viewModel.retry() } }
-    val onClearDeleteErrorStable = remember(viewModel) { { viewModel.clearDeleteError() } }
-
     TenantSelectionScreenContent(
         state = state,
         snackbarHostState = snackbarHostState,
-        onTenantSelected = onTenantSelectedStable,
-        onDeleteTenant = onDeleteTenantStable,
+        onTenantSelected = { viewModel.selectTenant(it)},
+        onDeleteTenant = {viewModel.deleteTenant(it.tenantId)},
         onEditTenant = onNavigateToEditTenant,
         onCreateTenantClick = onNavigateToCreateTenant,
-        onRetryClick = onRetryClickStable,
-        onClearDeleteError = onClearDeleteErrorStable,
+        onRetryClick = { viewModel.loadTenants() },
     )
 }
 
@@ -123,7 +117,6 @@ fun TenantSelectionScreenContent(
     onEditTenant: (Tenant) -> Unit,
     onCreateTenantClick: () -> Unit,
     onRetryClick: () -> Unit,
-    onClearDeleteError: () -> Unit,
 ) {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var tenantToDelete by remember { mutableStateOf<Tenant?>(null) }
@@ -230,6 +223,10 @@ fun TenantListContent(
     onDeleteTenant: (Tenant) -> Unit,
     onEditTenant: (Tenant) -> Unit
 ) {
+    val stableClick = remember(onTenantSelected) { { tenant: Tenant -> onTenantSelected(tenant) } }
+    val stableDelete = remember(onDeleteTenant) { { tenant: Tenant -> onDeleteTenant(tenant) } }
+    val stableEdit = remember(onEditTenant) { { tenant: Tenant -> onEditTenant(tenant) } }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -241,9 +238,9 @@ fun TenantListContent(
         ) { tenant ->
             TenantListItem(
                 tenant = tenant,
-                onClick = { onTenantSelected(tenant) },
-                onDelete = { onDeleteTenant(tenant) },
-                onEdit = { onEditTenant(tenant) }
+                onClick = { stableClick(it) },
+                onDelete = { stableDelete(it) },
+                onEdit = { stableEdit(it) }
             )
         }
     }
@@ -252,9 +249,9 @@ fun TenantListContent(
 @Composable
 fun TenantListItem(
     tenant: Tenant,
-    onClick: () -> Unit,
-    onDelete: () -> Unit,
-    onEdit: () -> Unit
+    onClick: (Tenant) -> Unit,
+    onDelete: (Tenant) -> Unit,
+    onEdit: (Tenant) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -268,7 +265,8 @@ fun TenantListItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClick = onClick),
+                .clickable(onClick = {onClick(tenant)})
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {
@@ -332,7 +330,7 @@ fun TenantListItem(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 IconButton(
-                    onClick = onEdit,
+                    onClick = {onEdit(tenant)},
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
@@ -344,7 +342,7 @@ fun TenantListItem(
                 }
 
                 IconButton(
-                    onClick = onDelete,
+                    onClick = {onDelete(tenant)},
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
@@ -489,6 +487,5 @@ fun TenantSelectionScreenPreview() {
         onRetryClick = {},
         onDeleteTenant = {},
         onEditTenant = {},
-        onClearDeleteError = {},
     )
 }
