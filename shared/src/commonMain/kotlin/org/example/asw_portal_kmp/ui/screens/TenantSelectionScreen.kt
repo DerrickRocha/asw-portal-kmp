@@ -34,8 +34,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,6 +73,9 @@ fun TenantSelectionScreen(
     }
 
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(refreshTrigger) {
@@ -78,12 +85,23 @@ fun TenantSelectionScreen(
                 is TenantSelectionEvent.NavigateToTenantConsole -> {
                     onNavigateToTenantConsole(event.tenantId)
                 }
+
+                TenantSelectionEvent.DeleteTenantError -> {
+
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = "Failed to delete tenant",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
             }
         }
     }
 
     TenantSelectionScreenContent(
         state = state,
+        snackbarHostState = snackbarHostState,
         onTenantSelected = viewModel::selectTenant,
         onDeleteTenant = { tenant ->
             scope.launch {
@@ -97,17 +115,20 @@ fun TenantSelectionScreen(
         },
         onCreateTenantClick = onNavigateToCreateTenant,
         onRetryClick = viewModel::retry,
+        onClearDeleteError = viewModel::clearDeleteError,
     )
 }
 
 @Composable
 fun TenantSelectionScreenContent(
     state: TenantSelectionState,
+    snackbarHostState: SnackbarHostState,
     onTenantSelected: (Tenant) -> Unit,
     onDeleteTenant: (Tenant) -> Unit,
     onEditTenant: (Tenant) -> Unit,
     onCreateTenantClick: () -> Unit,
     onRetryClick: () -> Unit,
+    onClearDeleteError: () -> Unit,
 ) {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var tenantToDelete by remember { mutableStateOf<Tenant?>(null) }
@@ -126,7 +147,8 @@ fun TenantSelectionScreenContent(
                     contentDescription = "Create Tenant"
                 )
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -138,9 +160,9 @@ fun TenantSelectionScreenContent(
                     LoadingContent()
                 }
 
-                state.error != null -> {
+                state.loadError != null -> {
                     ErrorContent(
-                        error = state.error,
+                        error = state.loadError,
                         onRetry = onRetryClick
                     )
                 }
@@ -473,10 +495,12 @@ fun TenantSelectionScreenPreview() {
                 )
             )
         ),
+        snackbarHostState = remember { SnackbarHostState() },
         onTenantSelected = {},
         onCreateTenantClick = {},
         onRetryClick = {},
         onDeleteTenant = {},
-        onEditTenant = {}
+        onEditTenant = {},
+        onClearDeleteError = {},
     )
 }

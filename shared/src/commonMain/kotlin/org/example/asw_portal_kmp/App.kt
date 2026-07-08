@@ -48,6 +48,7 @@ import org.example.asw_portal_kmp.navigation.TenantRoute
 import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack
 import org.example.asw_portal_kmp.navigation.rememberTenantNavBackStack
 import org.example.asw_portal_kmp.ui.screens.AddTenantScreen
+import org.example.asw_portal_kmp.ui.screens.EditTenantScreen
 import org.example.asw_portal_kmp.ui.screens.LoginScreen
 import org.example.asw_portal_kmp.ui.screens.PinScreen
 import org.example.asw_portal_kmp.ui.screens.SignupScreen
@@ -337,7 +338,9 @@ fun TenantNavDisplay(onLogoutClick: () -> Unit) {
                                             tenantsBackstack.add(TenantRoute.TenantConsole(tenantId))
                                         },
                                         onNavigateToCreateTenant = { tenantsBackstack.add(TenantRoute.CreateTenant) },
-                                        onNavigateToEditTenant = { tenant -> },
+                                        onNavigateToEditTenant = { tenant ->
+                                            tenantsBackstack.add(TenantRoute.EditTenant(tenant))
+                                        },
                                         refreshTrigger = refreshTrigger
                                     )
                                 }
@@ -356,6 +359,18 @@ fun TenantNavDisplay(onLogoutClick: () -> Unit) {
                         is TenantRoute.TenantConsole -> NavEntry(key = tenantKey, content = {
                             title = "Tenant Console"
                             Text("Tenant Console")
+                        })
+
+                        is TenantRoute.EditTenant -> NavEntry(key = tenantKey, content = {
+                            title = "Edit Tenant"
+                            EditTenantScreen(
+                                tenantKey.tenant,
+                                onUpdateSuccess = {
+                                    refreshTrigger = !refreshTrigger
+                                    tenantsBackstack.removeLast()
+                                },
+                                onNavigateBack = { tenantsBackstack.removeLast() }
+                            )
                         })
 
                         else -> NavEntry(
