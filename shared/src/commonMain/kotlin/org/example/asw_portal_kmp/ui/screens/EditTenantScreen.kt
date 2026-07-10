@@ -32,9 +32,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign.Companion.Center
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.example.asw_portal_kmp.network.api.tenants.Tenant
@@ -52,7 +54,7 @@ fun EditTenantScreen(
     val viewModel: EditTenantScreenViewModel = viewModel { EditTenantScreenViewModel(tenant) }
     val state by viewModel.state.collectAsState()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel.events) {
         viewModel.events.collect { event ->
             when (event) {
                 EditTenantEvent.UpdateSuccess -> onUpdateSuccess()
@@ -61,12 +63,17 @@ fun EditTenantScreen(
         }
     }
 
+    val onEditNameChange = remember(viewModel) { { name: String -> viewModel.updateName(name) } }
+    val onDomainChange = remember(viewModel) { { domain: String -> viewModel.updateDomain(domain) } }
+    val onCustomDomainChange = remember(viewModel) { { customDomain: String -> viewModel.updateCustomDomain(customDomain) } }
+    val onSubmit = remember(viewModel) { { viewModel.updateTenant() } }
+
     EditTenantScreenContent(
         state = state,
-        onNameChange = viewModel::updateName,
-        onDomainChange = viewModel::updateDomain,
-        onCustomDomainChange = viewModel::updateCustomDomain,
-        onSubmit = viewModel::updateTenant,
+        onNameChange = onEditNameChange,
+        onDomainChange = onDomainChange,
+        onCustomDomainChange = onCustomDomainChange,
+        onSubmit = onSubmit,
         onNavigateBack = onNavigateBack,
     )
 
@@ -82,7 +89,6 @@ fun EditTenantScreenContent(
     onNavigateBack: () -> Unit
 ) {
     val scrollState = rememberScrollState()
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -95,126 +101,143 @@ fun EditTenantScreenContent(
             )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(scrollState),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
             if (state.isSuccess) {
-                SuccessContent(
-                    message = "Tenant updated successfully!",
-                    onContinue = onSubmit
-                )
-            } else {
-                // Header
-                Text(
-                    text = "Edit Tenant Details",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Text(
-                    text = "Update the details below",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                OutlinedTextField(
-                    value = state.name,
-                    onValueChange = onNameChange,
-                    label = { Text("Tenant Name") },
-                    placeholder = { Text("e.g., Acme Corporation") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !state.isLoading,
-                    singleLine = true,
-                    isError = state.nameError != null,
-                    supportingText = {
-                        if (state.nameError != null) {
-                            Text(
-                                text = state.nameError,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    }
-                )
-
-                OutlinedTextField(
-                    value = state.domain,
-                    onValueChange = onDomainChange,
-                    label = { Text("Subdomain") },
-                    placeholder = { Text("e.g., acme") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !state.isLoading,
-                    singleLine = true,
-                    isError = state.domainError != null,
-                    supportingText = {
-                        if (state.domainError != null) {
-                            Text(
-                                text = state.domainError!!,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        } else if (state.domain.isNotBlank()) {
-                            Text(
-                                text = "Tenant URL: ${state.domain}.yourapp.com",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                )
-
-                OutlinedTextField(
-                    value = state.customDomain,
-                    onValueChange = onCustomDomainChange,
-                    label = { Text("Custom Domain (Optional)") },
-                    placeholder = { Text("e.g., portal.mycompany.com") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !state.isLoading,
-                    singleLine = true,
-                    isError = state.customDomainError != null,
-                    supportingText = {
-                        if (state.customDomainError != null) {
-                            Text(
-                                text = state.customDomainError!!,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        } else if (state.customDomain.isNotBlank()) {
-                            Text(
-                                text = "Custom domain: $state.customDomain",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                )
-
-                if (state.generalError != null) {
-                    ErrorCard(message = state.generalError!!)
-                }
-
-                Button(
-                    onClick = onSubmit,
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    enabled = !state.isLoading &&
-                            state.name.isNotBlank() &&
-                            state.domain.isNotBlank() &&
-                            state.domainError == null
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    if (state.isLoading) {
-                        LoadingButtonContent(text = "Updating Tenant...")
-                    } else {
-                        Text(
-                            text = "Update Tenant",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                    SuccessContent(
+                        message = "Tenant updated successfully!",
+                        onContinue = onNavigateBack // ⭐ Fix: Navigate away on success instead of re-submitting
+                    )
+                }
+            } else {
+                // Input Form Container Block
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp)
+                        .verticalScroll(scrollState),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Edit Tenant Details",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Text(
+                        text = "Update the details below",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = state.name,
+                        onValueChange = onNameChange,
+                        label = { Text("Tenant Name") },
+                        placeholder = { Text("e.g., Acme Corporation") },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !state.isLoading,
+                        singleLine = true,
+                        isError = state.nameError != null,
+                        supportingText = {
+                            if (state.nameError != null) {
+                                Text(
+                                    text = state.nameError,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                    )
+
+                    OutlinedTextField(
+                        value = state.domain,
+                        onValueChange = onDomainChange,
+                        label = { Text("Subdomain") },
+                        placeholder = { Text("e.g., acme") },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !state.isLoading,
+                        singleLine = true,
+                        isError = state.domainError != null,
+                        supportingText = {
+                            if (state.domainError != null) {
+                                Text(
+                                    text = state.domainError,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            } else if (state.domain.isNotBlank()) {
+                                Text(
+                                    text = "Tenant URL: ${state.domain}.yourapp.com",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    )
+
+                    OutlinedTextField(
+                        value = state.customDomain ?: "",
+                        onValueChange = onCustomDomainChange,
+                        label = { Text("Custom Domain (Optional)") },
+                        placeholder = { Text("e.g., portal.mycompany.com") },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !state.isLoading,
+                        singleLine = true,
+                        isError = state.customDomainError != null,
+                        supportingText = {
+                            if (state.customDomainError != null) {
+                                Text(
+                                    text = state.customDomainError,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            } else if (!state.customDomain.isNullOrBlank()) {
+                                // ⭐ Fix: Wrapped string interpolation in curly braces
+                                Text(
+                                    text = "Custom domain: ${state.customDomain}",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    )
+
+                    if (state.generalError != null) {
+                        ErrorCard(message = state.generalError)
                     }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Button(
+                        onClick = onSubmit,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        enabled = !state.isLoading &&
+                                state.name.isNotBlank() &&
+                                state.domain.isNotBlank() &&
+                                state.domainError == null
+                    ) {
+                        if (state.isLoading) {
+                            LoadingButtonContent(text = "Updating Tenant...")
+                        } else {
+                            Text(
+                                text = "Update Tenant",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
@@ -293,4 +316,17 @@ fun LoadingButtonContent(text: String) {
         Spacer(modifier = Modifier.width(12.dp))
         Text(text)
     }
+}
+
+@Preview
+@Composable
+fun EditTenantScreenPreview() {
+    EditTenantScreenContent(
+        state = EditTenantState(isSuccess = false),
+        onNameChange = {},
+        onDomainChange = {},
+        onCustomDomainChange = {},
+        onSubmit = {},
+        onNavigateBack = {}
+    )
 }

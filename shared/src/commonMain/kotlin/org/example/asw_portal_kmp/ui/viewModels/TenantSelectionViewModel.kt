@@ -14,14 +14,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
-import org.example.asw_portal_kmp.data.KeyValuePairManager
+import org.example.asw_portal_kmp.data.AppConfiguration
 import org.example.asw_portal_kmp.network.api.RepositoryResult
 import org.example.asw_portal_kmp.network.api.tenants.Tenant
 import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
 
 class TenantSelectionViewModel(
-    private val keyValuePairManager: KeyValuePairManager = Dependencies.kvManager,
-    private val repository: TenantsRepository = Dependencies.tenantsRepository
+    private val repository: TenantsRepository = Dependencies.tenantsRepository,
+    private val configuration: AppConfiguration = Dependencies.appConfiguration,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TenantSelectionState())
@@ -48,8 +48,7 @@ class TenantSelectionViewModel(
             }
 
             try {
-                val result = repository.getTenants()
-                when (result) {
+                when (val result = repository.getTenants()) {
                     is RepositoryResult.Failure -> _state.update {
                         it.copy(
                             loadError = result.message,
@@ -77,7 +76,7 @@ class TenantSelectionViewModel(
 
     fun selectTenant(tenant: Tenant) {
         viewModelScope.launch {
-            keyValuePairManager.saveTenantId(tenant.tenantId)
+            configuration.saveTenantId(tenant.tenantId)
             _events.emit(TenantSelectionEvent.NavigateToTenantConsole(tenant.tenantId))
         }
     }
@@ -92,8 +91,7 @@ class TenantSelectionViewModel(
                 it.copy(isDeleting = true, deleteError = null)
             }
             try {
-                val result = repository.deleteTenant(tenantId)
-                when (result) {
+                when (val result = repository.deleteTenant(tenantId)) {
                     is RepositoryResult.Failure -> {
                         _state.update { it.copy(isDeleting = false, deleteError = result.message) }
                         _events.emit(TenantSelectionEvent.DeleteTenantError)
@@ -102,7 +100,8 @@ class TenantSelectionViewModel(
                     is RepositoryResult.Success<Unit> -> {
                         _state.update { currentState ->
                             currentState.copy(
-                                tenants = currentState.tenants.filter { it.tenantId != tenantId }.toImmutableList(),                                isDeleting = false,
+                                tenants = currentState.tenants.filter { it.tenantId != tenantId }.toImmutableList(),
+                                isDeleting = false,
                                 deleteError = null
                             )
                         }
@@ -134,5 +133,5 @@ data class TenantSelectionState(
 
 sealed class TenantSelectionEvent {
     data class NavigateToTenantConsole(val tenantId: Int) : TenantSelectionEvent()
-    data object DeleteTenantError: TenantSelectionEvent()
+    data object DeleteTenantError : TenantSelectionEvent()
 }
