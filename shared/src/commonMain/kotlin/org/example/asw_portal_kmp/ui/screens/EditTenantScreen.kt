@@ -116,11 +116,10 @@ fun EditTenantScreenContent(
                 ) {
                     SuccessContent(
                         message = "Tenant updated successfully!",
-                        onContinue = onNavigateBack // ⭐ Fix: Navigate away on success instead of re-submitting
+                        onContinue = onNavigateBack
                     )
                 }
             } else {
-                // Input Form Container Block
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -203,7 +202,6 @@ fun EditTenantScreenContent(
                                     color = MaterialTheme.colorScheme.error
                                 )
                             } else if (!state.customDomain.isNullOrBlank()) {
-                                // ⭐ Fix: Wrapped string interpolation in curly braces
                                 Text(
                                     text = "Custom domain: ${state.customDomain}",
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
