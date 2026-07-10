@@ -8,6 +8,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.utils.io.ioDispatcher
 import kotlinx.serialization.json.Json
+import org.example.asw_portal_kmp.data.AppConfiguration
 import org.example.asw_portal_kmp.data.Encryptor
 import org.example.asw_portal_kmp.data.KeyValuePairManager
 import org.example.asw_portal_kmp.data.KeyValuePairManagerImplementation
@@ -48,5 +49,7 @@ object Dependencies {
     val authRepository: AuthRepository = AuthRepositoryImpl(networkManager, kvManager, dispatcher)
 
     val tenantsRepository: TenantsRepository = TenantsRepositoryImplementation(networkManager, dispatcher)
+
+    val appConfiguration = AppConfiguration(kvManager)
 
 }

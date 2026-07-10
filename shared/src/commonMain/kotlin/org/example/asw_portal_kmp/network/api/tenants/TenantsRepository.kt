@@ -7,13 +7,20 @@ import org.example.asw_portal_kmp.network.NetworkManager
 import org.example.asw_portal_kmp.network.NetworkResult
 import org.example.asw_portal_kmp.network.api.RepositoryResult
 import org.example.asw_portal_kmp.network.RequestOptions
+import org.example.asw_portal_kmp.network.deleteJson
 import org.example.asw_portal_kmp.network.getJson
 import org.example.asw_portal_kmp.network.postJson
+import org.example.asw_portal_kmp.network.putJson
 
 interface TenantsRepository {
 
     suspend fun getTenants(): RepositoryResult<List<Tenant>>
     suspend fun createTenant(name: String, domain: String, customDomain: String?): RepositoryResult<AddTenantResponse>
+
+    suspend fun getTenant(id: Int): RepositoryResult<Tenant>
+
+    suspend fun deleteTenant(id: Int): RepositoryResult<Unit>
+    suspend fun updateTenant(updatedTenant: Tenant): RepositoryResult<Unit>
 }
 
 class TenantsRepositoryImplementation(
@@ -59,10 +66,44 @@ class TenantsRepositoryImplementation(
             AddTenantRequest(name, domain, customDomain),
             options = RequestOptions(isAuthRequired = true, isTenantRequired = false)
         )
-        when(networkResult) {
+        when (networkResult) {
             is NetworkResult.Success -> RepositoryResult.Success(networkResult.data)
             is NetworkResult.Error -> RepositoryResult.Failure(networkResult.message)
-            is NetworkResult.Exception -> RepositoryResult.Failure(networkResult.throwable.message ?: "Failed to create tenant")
+            is NetworkResult.Exception -> RepositoryResult.Failure(
+                networkResult.throwable.message ?: "Failed to create tenant"
+            )
+        }
+    }
+
+    override suspend fun getTenant(id: Int): RepositoryResult<Tenant> = withContext(dispatcher) {
+        val networkResult = networkManager.getJson<Tenant>(
+            "/tenants/$id",
+            options = RequestOptions(isAuthRequired = true, isTenantRequired = false)
+        )
+        when (networkResult) {
+            is NetworkResult.Success -> RepositoryResult.Success(networkResult.data)
+            is NetworkResult.Error -> RepositoryResult.Failure(networkResult.message)
+            is NetworkResult.Exception -> RepositoryResult.Failure(
+                networkResult.throwable.message ?: "Failed to fetch tenant"
+            )
+        }
+    }
+
+    override suspend fun deleteTenant(id: Int): RepositoryResult<Unit> {
+        val networkResult = networkManager.deleteJson<Int>(url = "/tenants/$id", options = RequestOptions(isAuthRequired = true, isTenantRequired = false))
+        return when (networkResult) {
+            is NetworkResult.Success -> RepositoryResult.Success(Unit)
+            is NetworkResult.Error -> RepositoryResult.Failure(networkResult.message)
+            is NetworkResult.Exception -> RepositoryResult.Failure(networkResult.throwable.message ?: "Failed to delete tenant")
+        }
+    }
+
+    override suspend fun updateTenant(updatedTenant: Tenant): RepositoryResult<Unit> {
+        val networkResult = networkManager.putJson<Tenant, Tenant>(url = "/tenants", options = RequestOptions(isAuthRequired = true, false), requestBody = updatedTenant)
+        return when (networkResult) {
+            is NetworkResult.Success -> RepositoryResult.Success(Unit)
+            is NetworkResult.Error -> RepositoryResult.Failure(networkResult.message)
+            is NetworkResult.Exception -> RepositoryResult.Failure(networkResult.throwable.message ?: "Failed to update tenant")
         }
     }
 

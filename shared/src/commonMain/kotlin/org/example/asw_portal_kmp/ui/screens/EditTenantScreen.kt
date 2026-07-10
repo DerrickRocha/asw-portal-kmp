@@ -14,7 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -26,63 +27,85 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextAlign.Companion.Center
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.example.asw_portal_kmp.ui.viewModels.AddTenantScreenViewModel
-import org.example.asw_portal_kmp.ui.viewModels.AddTenantState
+import org.example.asw_portal_kmp.network.api.tenants.Tenant
+import org.example.asw_portal_kmp.ui.viewModels.EditTenantEvent
+import org.example.asw_portal_kmp.ui.viewModels.EditTenantScreenViewModel
+import org.example.asw_portal_kmp.ui.viewModels.EditTenantState
 
 @Composable
-fun AddTenantScreen(
-    onContinueClicked: () -> Unit,
+fun EditTenantScreen(
+    tenant: Tenant,
+    onUpdateSuccess: () -> Unit,
+    onNavigateBack: () -> Unit
 ) {
-    val viewModel: AddTenantScreenViewModel = viewModel {
-        AddTenantScreenViewModel()
-    }
 
+    val viewModel: EditTenantScreenViewModel = viewModel { EditTenantScreenViewModel(tenant) }
     val state by viewModel.state.collectAsState()
 
-    val onNameChange = remember(viewModel) { { name: String -> viewModel.updateName(name) } }
+    LaunchedEffect(viewModel.events) {
+        viewModel.events.collect { event ->
+            when (event) {
+                EditTenantEvent.UpdateSuccess -> onUpdateSuccess()
+                EditTenantEvent.NavigateBack -> onNavigateBack()
+            }
+        }
+    }
+
+    val onEditNameChange = remember(viewModel) { { name: String -> viewModel.updateName(name) } }
     val onDomainChange = remember(viewModel) { { domain: String -> viewModel.updateDomain(domain) } }
     val onCustomDomainChange = remember(viewModel) { { customDomain: String -> viewModel.updateCustomDomain(customDomain) } }
-    val onSubmit = remember(viewModel) { { viewModel.createTenant() } }
+    val onSubmit = remember(viewModel) { { viewModel.updateTenant() } }
 
-    AddTenantScreenContent(
+    EditTenantScreenContent(
         state = state,
-        onNameChange = onNameChange,
+        onNameChange = onEditNameChange,
         onDomainChange = onDomainChange,
         onCustomDomainChange = onCustomDomainChange,
         onSubmit = onSubmit,
-        onContinueClicked = onContinueClicked,
+        onNavigateBack = onNavigateBack,
     )
+
 }
 
 @Composable
-fun AddTenantScreenContent(
-    state: AddTenantState,
+fun EditTenantScreenContent(
+    state: EditTenantState,
     onNameChange: (String) -> Unit,
     onDomainChange: (String) -> Unit,
     onCustomDomainChange: (String) -> Unit,
     onSubmit: () -> Unit,
-    onContinueClicked: () -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     val scrollState = rememberScrollState()
-
-    Scaffold { paddingValues ->
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Edit Tenant") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
             if (state.isSuccess) {
                 Column(
                     modifier = Modifier
@@ -91,33 +114,11 @@ fun AddTenantScreenContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = "New Tenant Added Successfully!",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                    SuccessContent(
+                        message = "Tenant updated successfully!",
+                        onContinue = onNavigateBack
                     )
-
-
-                    Text(
-                        text = "Your tenant has been created.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(bottom = 32.dp)
-                    )
-
-                    Button(
-                        onClick = onContinueClicked,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 32.dp)
-                    ) {
-                        Text("Continue")
-                    }
                 }
-
             } else {
                 Column(
                     modifier = Modifier
@@ -130,13 +131,13 @@ fun AddTenantScreenContent(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Create a New Tenant",
+                        text = "Edit Tenant Details",
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Text(
-                        text = "Fill in the details below to create your tenant",
+                        text = "Update the details below",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -158,20 +159,6 @@ fun AddTenantScreenContent(
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
-                        },
-                        trailingIcon = {
-                            if (state.name.isNotBlank()) {
-                                IconButton(
-                                    onClick = { onNameChange("") },
-                                    enabled = !state.isLoading
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Clear",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
                         }
                     )
 
@@ -192,7 +179,7 @@ fun AddTenantScreenContent(
                                 )
                             } else if (state.domain.isNotBlank()) {
                                 Text(
-                                    text = "Your tenant URL will be: ${state.domain}.yourapp.com",
+                                    text = "Tenant URL: ${state.domain}.yourapp.com",
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -200,7 +187,7 @@ fun AddTenantScreenContent(
                     )
 
                     OutlinedTextField(
-                        value = state.customDomain,
+                        value = state.customDomain ?: "",
                         onValueChange = onCustomDomainChange,
                         label = { Text("Custom Domain (Optional)") },
                         placeholder = { Text("e.g., portal.mycompany.com") },
@@ -214,9 +201,9 @@ fun AddTenantScreenContent(
                                     text = state.customDomainError,
                                     color = MaterialTheme.colorScheme.error
                                 )
-                            } else if (state.customDomain.isNotBlank()) {
+                            } else if (!state.customDomain.isNullOrBlank()) {
                                 Text(
-                                    text = "Your custom domain will be: ${state.customDomain}",
+                                    text = "Custom domain: ${state.customDomain}",
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -224,31 +211,7 @@ fun AddTenantScreenContent(
                     )
 
                     if (state.generalError != null) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer
-                            )
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Error,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error
-                                )
-                                Text(
-                                    text = state.generalError,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
+                        ErrorCard(message = state.generalError)
                     }
 
                     Spacer(modifier = Modifier.weight(1f))
@@ -264,49 +227,11 @@ fun AddTenantScreenContent(
                                 state.domainError == null
                     ) {
                         if (state.isLoading) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    strokeWidth = 2.dp
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text("Creating Tenant...")
-                            }
+                            LoadingButtonContent(text = "Updating Tenant...")
                         } else {
                             Text(
-                                text = "Create Tenant",
+                                text = "Update Tenant",
                                 style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = "What's a Tenant?",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = "A tenant is a separate workspace for your organization. Each tenant has its own users, projects, and settings. Your subdomain will be used to access your tenant portal.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -317,15 +242,89 @@ fun AddTenantScreenContent(
     }
 }
 
+@Composable
+fun SuccessContent(message: String, onContinue: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.CheckCircle,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = message,
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = Center
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(
+            onClick = onContinue,
+            modifier = Modifier.fillMaxWidth(0.6f)
+        ) {
+            Text("Continue")
+        }
+    }
+}
+
+@Composable
+fun ErrorCard(message: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Error,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error
+            )
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+    }
+}
+
+@Composable
+fun LoadingButtonContent(text: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(24.dp),
+            color = MaterialTheme.colorScheme.onPrimary,
+            strokeWidth = 2.dp
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text)
+    }
+}
+
 @Preview
 @Composable
-fun AddTenantScreenPreview() {
-    AddTenantScreenContent(
-        state = AddTenantState(),
+fun EditTenantScreenPreview() {
+    EditTenantScreenContent(
+        state = EditTenantState(isSuccess = false),
         onNameChange = {},
         onDomainChange = {},
         onCustomDomainChange = {},
         onSubmit = {},
-        onContinueClicked = {  },
+        onNavigateBack = {}
     )
 }
