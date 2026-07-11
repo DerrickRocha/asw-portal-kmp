@@ -1,7 +1,7 @@
 [versions]
 agp = "9.0.1"
 android-compileSdk = "36"
-android-minSdk = "24"
+android-minSdk = "26"
 android-targetSdk = "36"
 androidx-activity = "1.13.0"
 androidx-appcompat = "1.7.1"
@@ -24,6 +24,7 @@ ktx-datetime = "0.8.0"
 room = "2.8.4"
 sqlite = "2.7.0"
 ksp = "2.3.9"
+workManager = "3.0.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -64,6 +65,9 @@ androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.r
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-sqlite-wrapper = { module = "androidx.room:room-sqlite-wrapper", version.ref = "room" }
+
+kmp-workManager = { module = "dev.brewkits:kmpworkmanager", version.ref = "workManager"}
+kmp-workManager-jvm = { module = "dev.brewkits:kmpworkmanager-http", version.ref = "workManager"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

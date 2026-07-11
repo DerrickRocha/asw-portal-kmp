@@ -84,6 +84,19 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
+
+        val appleAndAndroidMain by creating {
+            dependsOn(commonMain.get())
+        }
+
+        // 2. Point target platforms to look at your custom source set
+        androidMain.get().dependsOn(appleAndAndroidMain)
+        appleMain.get().dependsOn(appleAndAndroidMain) // configuration wrapper for iOS targets
+
+        // 3. Declare the library safely here
+        appleAndAndroidMain.dependencies {
+            implementation(libs.kmp.workManager)
+        }
     }
 }
 
