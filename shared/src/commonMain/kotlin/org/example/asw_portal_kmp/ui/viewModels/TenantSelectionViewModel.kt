@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
 import org.example.asw_portal_kmp.data.KeyValuePairManager
 import org.example.asw_portal_kmp.data.repositories.RepositoryResult
-import org.example.asw_portal_kmp.data.repositories.tenants.NetworkTenant
+import org.example.asw_portal_kmp.data.network.NetworkTenant
 import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepository
 
 class TenantSelectionViewModel(

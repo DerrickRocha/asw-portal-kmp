@@ -40,7 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.example.asw_portal_kmp.data.repositories.tenants.NetworkTenant
+import org.example.asw_portal_kmp.data.network.NetworkTenant
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionEvent
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionState
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionViewModel

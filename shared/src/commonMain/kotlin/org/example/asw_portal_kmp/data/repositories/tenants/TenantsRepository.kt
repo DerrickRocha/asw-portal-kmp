@@ -4,10 +4,12 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
 import org.example.asw_portal_kmp.data.database.tenants.TenantDao
 import org.example.asw_portal_kmp.data.database.tenants.TenantEntity
 import org.example.asw_portal_kmp.data.models.Tenant
+import org.example.asw_portal_kmp.data.network.NetworkTenant
+import org.example.asw_portal_kmp.data.network.requests.tenants.CreateTenantRequest
+import org.example.asw_portal_kmp.data.network.responses.tenants.AddTenantResponse
 import org.example.asw_portal_kmp.network.NetworkManager
 import org.example.asw_portal_kmp.network.NetworkResult
 import org.example.asw_portal_kmp.data.repositories.RepositoryResult
@@ -107,7 +109,6 @@ class TenantsRepositoryImplementation(
         )
     }
 
-
     override suspend fun getTenants(): RepositoryResult<List<NetworkTenant>> = withContext(dispatcher) {
         try {
             val response = networkManager.getJson<List<NetworkTenant>>(
@@ -141,9 +142,9 @@ class TenantsRepositoryImplementation(
         domain: String,
         customDomain: String?
     ): RepositoryResult<AddTenantResponse> = withContext(dispatcher) {
-        val networkResult = networkManager.postJson<AddTenantRequest, AddTenantResponse>(
+        val networkResult = networkManager.postJson<CreateTenantRequest, AddTenantResponse>(
             "/tenants",
-            AddTenantRequest(name, domain, customDomain),
+            CreateTenantRequest(name, domain, customDomain),
             options = RequestOptions(isAuthRequired = true, isTenantRequired = false)
         )
         when (networkResult) {
@@ -156,21 +157,3 @@ class TenantsRepositoryImplementation(
     }
 
 }
-
-@Serializable
-data class AddTenantRequest(
-    val name: String,
-    val subDomain: String,
-    val customDomain: String?
-)
-
-@Serializable
-data class AddTenantResponse(
-    val tenantId: Int,
-    val subDomain: String,
-    val customDomain: String?,
-    val name: String,
-    val createdAt: String,
-    val updatedAt: String,
-    val rowVersion: String
-)
