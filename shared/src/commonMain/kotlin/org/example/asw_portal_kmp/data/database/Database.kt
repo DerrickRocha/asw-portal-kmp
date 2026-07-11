@@ -13,6 +13,8 @@ import kotlinx.coroutines.IO
 import org.example.asw_portal_kmp.data.database.tenants.TenantDao
 import org.example.asw_portal_kmp.data.database.tenants.TenantEntity
 
+expect fun getDatabaseBuilder(): RoomDatabase.Builder<AppDatabase>
+
 @Database(
     entities = [TenantEntity::class],
     version = 2,
@@ -32,8 +34,6 @@ abstract class AppDatabase : RoomDatabase() {
 expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
     override fun initialize(): AppDatabase
 }
-
-
 fun getRoomDatabase(
     builder: RoomDatabase.Builder<AppDatabase>
 ): AppDatabase {

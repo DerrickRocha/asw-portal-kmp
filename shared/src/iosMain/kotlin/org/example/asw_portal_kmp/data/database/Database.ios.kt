@@ -1,15 +1,14 @@
-package org.example.asw_portal_kmp.data
+package org.example.asw_portal_kmp.data.database
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import kotlinx.cinterop.ExperimentalForeignApi
-import org.example.asw_portal_kmp.data.database.AppDatabase
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
 
 
-fun getDatabaseBuilder(): RoomDatabase.Builder<AppDatabase> {
+actual fun getDatabaseBuilder(): RoomDatabase.Builder<AppDatabase> {
     val dbFilePath = documentDirectory() + "/asw_portal_room.db"
     return Room.databaseBuilder<AppDatabase>(
         name = dbFilePath,

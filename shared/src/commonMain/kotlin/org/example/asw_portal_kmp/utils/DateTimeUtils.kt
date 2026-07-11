@@ -3,9 +3,11 @@ package org.example.asw_portal_kmp.utils
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 object DateUtils {
 
@@ -124,6 +126,16 @@ object DateUtils {
             else -> "Updated ${formatDateShort(isoString)}"
         }
     }
+
+    fun convertUtcStringToLong(timestampStr: String): Long {
+        // Parses the ISO-8601 string directly
+        val localDateTime = LocalDateTime.parse(timestampStr)
+
+        // Convert to Instant by explicitly applying UTC offset, then get milliseconds
+        return localDateTime.toInstant(UtcOffset.ZERO).toEpochMilliseconds()
+    }
+
+    fun Long.needsUpdate(updateIntervalInSeconds: Int): Boolean = (Clock.System.now().toEpochMilliseconds() - this) > (updateIntervalInSeconds * 1000)
 
     // Helper data class
     private data class DateTimeComponents(
