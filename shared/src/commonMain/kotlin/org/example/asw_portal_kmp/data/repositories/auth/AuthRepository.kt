@@ -1,7 +1,8 @@
-package org.example.asw_portal_kmp.network.api.auth
+package org.example.asw_portal_kmp.data.repositories.auth
 
 import io.ktor.utils.io.ioDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import org.example.asw_portal_kmp.data.KeyValuePairManager
 import org.example.asw_portal_kmp.network.AuthenticationException
@@ -61,7 +62,7 @@ class AuthRepositoryImpl(
                         is JsonParsingException -> "Server response format error. Please contact support."
                         is AuthenticationException -> "Authentication error. Please try again."
                         is TenantException -> "Tenant configuration error. Please contact support."
-                        is kotlinx.coroutines.TimeoutCancellationException -> "Request timed out. Please try again."
+                        is TimeoutCancellationException -> "Request timed out. Please try again."
                         else -> "Login failed. Please try again later."
                     }
                     LoginResult.Failure(message)

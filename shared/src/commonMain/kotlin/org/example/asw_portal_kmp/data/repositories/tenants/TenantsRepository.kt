@@ -1,18 +1,18 @@
-package org.example.asw_portal_kmp.network.api.tenants
+package org.example.asw_portal_kmp.data.repositories.tenants
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.example.asw_portal_kmp.network.NetworkManager
 import org.example.asw_portal_kmp.network.NetworkResult
-import org.example.asw_portal_kmp.network.api.RepositoryResult
+import org.example.asw_portal_kmp.data.repositories.RepositoryResult
 import org.example.asw_portal_kmp.network.RequestOptions
 import org.example.asw_portal_kmp.network.getJson
 import org.example.asw_portal_kmp.network.postJson
 
 interface TenantsRepository {
 
-    suspend fun getTenants(): RepositoryResult<List<Tenant>>
+    suspend fun getTenants(): RepositoryResult<List<NetworkTenant>>
     suspend fun createTenant(name: String, domain: String, customDomain: String?): RepositoryResult<AddTenantResponse>
 }
 
@@ -21,9 +21,9 @@ class TenantsRepositoryImplementation(
     private val dispatcher: CoroutineDispatcher
 ) : TenantsRepository {
 
-    override suspend fun getTenants(): RepositoryResult<List<Tenant>> = withContext(dispatcher) {
+    override suspend fun getTenants(): RepositoryResult<List<NetworkTenant>> = withContext(dispatcher) {
         try {
-            val response = networkManager.getJson<List<Tenant>>(
+            val response = networkManager.getJson<List<NetworkTenant>>(
                 url = "/tenants/all",
                 options = RequestOptions(
                     isAuthRequired = true,

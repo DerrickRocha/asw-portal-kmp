@@ -1,9 +1,9 @@
-package org.example.asw_portal_kmp.network.api.tenants
+package org.example.asw_portal_kmp.data.repositories.tenants
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Tenant(
+data class NetworkTenant(
     val tenantId: Int,
     val name: String,
     val subDomain: String,

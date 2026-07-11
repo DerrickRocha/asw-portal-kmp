@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
 import org.example.asw_portal_kmp.data.KeyValuePairManager
-import org.example.asw_portal_kmp.network.api.RepositoryResult
-import org.example.asw_portal_kmp.network.api.tenants.Tenant
-import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
+import org.example.asw_portal_kmp.data.repositories.RepositoryResult
+import org.example.asw_portal_kmp.data.repositories.tenants.NetworkTenant
+import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepository
 
 class TenantSelectionViewModel(
     private val keyValuePairManager: KeyValuePairManager = Dependencies.kvManager,
@@ -47,8 +47,8 @@ class TenantSelectionViewModel(
                         error = result.message,
                         isLoading = false
                     )
-                    is RepositoryResult.Success<List<Tenant>> -> _state.value = _state.value.copy(
-                        tenants = result.data,
+                    is RepositoryResult.Success<List<NetworkTenant>> -> _state.value = _state.value.copy(
+                        networkTenants = result.data,
                         isLoading = false
                     )
                 }
@@ -61,10 +61,10 @@ class TenantSelectionViewModel(
         }
     }
 
-    fun selectTenant(tenant: Tenant) {
+    fun selectTenant(networkTenant: NetworkTenant) {
         viewModelScope.launch {
-            keyValuePairManager.saveTenantId(tenant.tenantId)
-            _events.emit(TenantSelectionEvent.NavigateToTenantConsole(tenant.tenantId))
+            keyValuePairManager.saveTenantId(networkTenant.tenantId)
+            _events.emit(TenantSelectionEvent.NavigateToTenantConsole(networkTenant.tenantId))
         }
     }
 
@@ -74,7 +74,7 @@ class TenantSelectionViewModel(
 }
 
 data class TenantSelectionState(
-    val tenants: List<Tenant> = emptyList(),
+    val networkTenants: List<NetworkTenant> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 )
