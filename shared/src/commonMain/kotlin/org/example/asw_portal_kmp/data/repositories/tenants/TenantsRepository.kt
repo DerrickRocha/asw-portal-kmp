@@ -1,6 +1,8 @@
 package org.example.asw_portal_kmp.data.repositories.tenants
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -10,12 +12,14 @@ import org.example.asw_portal_kmp.data.models.Tenant
 import org.example.asw_portal_kmp.data.network.NetworkTenant
 import org.example.asw_portal_kmp.data.network.requests.tenants.CreateTenantRequest
 import org.example.asw_portal_kmp.data.network.responses.tenants.AddTenantResponse
-import org.example.asw_portal_kmp.network.NetworkManager
-import org.example.asw_portal_kmp.network.NetworkResult
+import org.example.asw_portal_kmp.data.network.NetworkManager
+import org.example.asw_portal_kmp.data.network.NetworkResult
 import org.example.asw_portal_kmp.data.repositories.RepositoryResult
-import org.example.asw_portal_kmp.network.RequestOptions
-import org.example.asw_portal_kmp.network.getJson
-import org.example.asw_portal_kmp.network.postJson
+import org.example.asw_portal_kmp.data.network.RequestOptions
+import org.example.asw_portal_kmp.data.network.getJson
+import org.example.asw_portal_kmp.data.network.postJson
+import org.example.asw_portal_kmp.data.workers.KspWorker
+import org.example.asw_portal_kmp.data.workers.KspWorkerType
 import org.example.asw_portal_kmp.utils.DateUtils.needsUpdate
 import kotlin.time.Clock
 
@@ -45,8 +49,9 @@ fun TenantEntity.toTenant(): Tenant {
 
 class TenantsRepositoryImplementation(
     private val networkManager: NetworkManager,
-    private val dispatcher: CoroutineDispatcher,
-    private val tenantsDao: TenantDao
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val tenantsDao: TenantDao,
+    private val kspWorker: KspWorker
 ) : TenantsRepository {
 
     override val tenants: Flow<List<Tenant>> =
@@ -61,9 +66,9 @@ class TenantsRepositoryImplementation(
         }
     }
 
-    private fun exponentialTenantsSync() {
+    private suspend fun exponentialTenantsSync() {
         if (tenantsDao.getLastModified().needsUpdate(10)) {
-            //
+            KspWorker().doWork(KspWorkerType.Tenants)
         }
     }
 

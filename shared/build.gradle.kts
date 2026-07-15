@@ -1,5 +1,10 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+repositories {
+    mavenCentral()
+    google()
+}
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidMultiplatformLibrary)
@@ -23,7 +28,6 @@ kotlin {
         }
     }
 
-    jvm()
 
     androidLibrary {
         namespace = "org.example.asw_portal_kmp.shared"
@@ -49,6 +53,8 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.androidx.room.sqlite.wrapper)
+            implementation(libs.androidx.work.runtime.ktx)
+
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -74,6 +80,8 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
+
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -84,19 +92,6 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
-
-        val appleAndAndroidMain by creating {
-            dependsOn(commonMain.get())
-        }
-
-        // 2. Point target platforms to look at your custom source set
-        androidMain.get().dependsOn(appleAndAndroidMain)
-        appleMain.get().dependsOn(appleAndAndroidMain) // configuration wrapper for iOS targets
-
-        // 3. Declare the library safely here
-        appleAndAndroidMain.dependencies {
-            implementation(libs.kmp.workManager)
-        }
     }
 }
 
@@ -105,5 +100,4 @@ dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
-    add("kspJvm", libs.androidx.room.compiler)
 }

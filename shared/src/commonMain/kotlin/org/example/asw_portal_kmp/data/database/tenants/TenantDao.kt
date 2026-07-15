@@ -21,8 +21,8 @@ interface TenantDao {
     fun getAllAsFlow(): Flow<List<TenantEntity>>
 
     @Query("SELECT * FROM tenants")
-    fun getAll(): List<TenantEntity>
+    suspend fun getAll(): List<TenantEntity>
 
     @Query("SELECT MAX(updatedAt) FROM tenants")
-    fun getLastModified(): Long
+    suspend fun getLastModified(): Long
 }

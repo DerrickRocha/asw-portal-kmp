@@ -14,12 +14,13 @@ import org.example.asw_portal_kmp.data.KeyValuePairManagerImplementation
 import org.example.asw_portal_kmp.data.createDataStore
 import org.example.asw_portal_kmp.data.database.getDatabaseBuilder
 import org.example.asw_portal_kmp.data.database.getRoomDatabase
-import org.example.asw_portal_kmp.network.NetworkConfig
-import org.example.asw_portal_kmp.network.NetworkManagerImplementation
+import org.example.asw_portal_kmp.data.network.NetworkConfig
+import org.example.asw_portal_kmp.data.network.NetworkManagerImplementation
 import org.example.asw_portal_kmp.data.repositories.auth.AuthRepository
 import org.example.asw_portal_kmp.data.repositories.auth.AuthRepositoryImpl
 import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepository
 import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepositoryImplementation
+import org.example.asw_portal_kmp.data.workers.KspWorker
 
 object Dependencies {
 
@@ -50,6 +51,11 @@ object Dependencies {
     private val dispatcher = ioDispatcher()
     val authRepository: AuthRepository = AuthRepositoryImpl(networkManager, kvManager, dispatcher)
 
-    val tenantsRepository: TenantsRepository = TenantsRepositoryImplementation(networkManager, dispatcher, database.getTenantDao())
-
+    private val worker = KspWorker()
+    val tenantsRepository: TenantsRepository = TenantsRepositoryImplementation(
+        networkManager,
+        dispatcher,
+        database.getTenantDao(),
+        worker
+    )
 }

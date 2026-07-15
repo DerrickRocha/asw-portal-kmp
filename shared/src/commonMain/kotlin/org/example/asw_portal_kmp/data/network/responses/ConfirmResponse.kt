@@ -1,4 +1,4 @@
-package org.example.asw_portal_kmp.network.responses
+package org.example.asw_portal_kmp.data.network.responses
 
 import kotlinx.serialization.Serializable
 

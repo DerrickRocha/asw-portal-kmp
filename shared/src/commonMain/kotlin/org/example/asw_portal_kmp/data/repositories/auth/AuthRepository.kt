@@ -5,18 +5,18 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import org.example.asw_portal_kmp.data.KeyValuePairManager
-import org.example.asw_portal_kmp.network.AuthenticationException
-import org.example.asw_portal_kmp.network.JsonParsingException
-import org.example.asw_portal_kmp.network.NetworkManager
-import org.example.asw_portal_kmp.network.NetworkResult
-import org.example.asw_portal_kmp.network.TenantException
-import org.example.asw_portal_kmp.network.postJson
-import org.example.asw_portal_kmp.network.requests.ConfirmRequest
-import org.example.asw_portal_kmp.network.requests.LoginRequest
-import org.example.asw_portal_kmp.network.requests.SignupRequest
-import org.example.asw_portal_kmp.network.requests.SignupResponse
-import org.example.asw_portal_kmp.network.responses.ConfirmResponse
-import org.example.asw_portal_kmp.network.responses.LoginResponse
+import org.example.asw_portal_kmp.data.network.AuthenticationException
+import org.example.asw_portal_kmp.data.network.JsonParsingException
+import org.example.asw_portal_kmp.data.network.NetworkManager
+import org.example.asw_portal_kmp.data.network.NetworkResult
+import org.example.asw_portal_kmp.data.network.TenantException
+import org.example.asw_portal_kmp.data.network.postJson
+import org.example.asw_portal_kmp.data.network.requests.ConfirmRequest
+import org.example.asw_portal_kmp.data.network.requests.LoginRequest
+import org.example.asw_portal_kmp.data.network.requests.SignupRequest
+import org.example.asw_portal_kmp.data.network.requests.SignupResponse
+import org.example.asw_portal_kmp.data.network.responses.ConfirmResponse
+import org.example.asw_portal_kmp.data.network.responses.LoginResponse
 import org.example.asw_portal_kmp.ui.viewModels.SignupResult
 
 interface AuthRepository {
