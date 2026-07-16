@@ -1,8 +1,13 @@
 package org.example.asw_portal_kmp.data.repositories.tenants
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import org.example.asw_portal_kmp.data.database.TenantEntity
+import org.example.asw_portal_kmp.data.database.TenantsDao
+import org.example.asw_portal_kmp.data.models.Tenant
 import org.example.asw_portal_kmp.data.network.NetworkManager
 import org.example.asw_portal_kmp.data.network.NetworkResult
 import org.example.asw_portal_kmp.data.repositories.RepositoryResult
@@ -12,8 +17,14 @@ import org.example.asw_portal_kmp.data.network.deleteJson
 import org.example.asw_portal_kmp.data.network.getJson
 import org.example.asw_portal_kmp.data.network.postJson
 import org.example.asw_portal_kmp.data.network.putJson
+import org.example.asw_portal_kmp.utils.DateUtils.needsUpdate
+import kotlin.time.Clock
 
 interface TenantsRepository {
+
+    val tenants: Flow<List<Tenant>>
+
+    suspend fun syncTenants()
 
     suspend fun getTenants(): RepositoryResult<List<NetworkTenant>>
     suspend fun createTenant(name: String, domain: String, customDomain: String?): RepositoryResult<AddTenantResponse>
@@ -24,10 +35,87 @@ interface TenantsRepository {
     suspend fun updateTenant(updatedNetworkTenant: NetworkTenant): RepositoryResult<Unit>
 }
 
+fun TenantEntity.toTenant(): Tenant {
+    return Tenant(
+        this.id,
+        this.name,
+        this.subDomain,
+        this.customDomain,
+        this.createdAt,
+        this.updatedAt,
+        this.rowVersion
+    )
+}
+
+fun NetworkTenant.toEntity(): TenantEntity {
+    return TenantEntity(
+        id = this.tenantId,
+        name = this.name,
+        subDomain = this.subDomain,
+        customDomain = this.customDomain,
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
+        rowVersion = this.rowVersion,
+        isDone = true,
+        lastModified = Clock.System.now().epochSeconds
+    )
+}
+
+
 class TenantsRepositoryImplementation(
     private val networkManager: NetworkManager,
-    private val dispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
+    private val tenantsDao: TenantsDao
 ) : TenantsRepository {
+
+
+
+    override val tenants: Flow<List<Tenant>> =
+        tenantsDao.getAllAsFlow().map { entities -> entities.map(TenantEntity::toTenant) }
+
+    override suspend fun syncTenants() {
+        val dbTenants = tenantsDao.getAll()
+        if (dbTenants.isEmpty()) {
+            immediateTenantsSync()
+        } else {
+            val tenant = dbTenants.first()
+            if (tenant.lastModified.needsUpdate(10)) {
+                exponentialTenantsSync()
+            }
+        }
+    }
+
+    private fun exponentialTenantsSync() {
+        TODO("Not yet implemented")
+    }
+
+    private suspend fun immediateTenantsSync() {
+        try {
+            val response = networkManager.getJson<List<NetworkTenant>>(
+                url = "/tenants/all",
+                options = RequestOptions(
+                    isAuthRequired = true,
+                    isTenantRequired = false
+                )
+            )
+            when (response) {
+                is NetworkResult.Success -> {
+                    val entities = response.data.map { it.toEntity() }
+                    tenantsDao.insertAll(entities)
+                }
+
+                is NetworkResult.Error -> throw Exception(response.message)
+
+
+                is NetworkResult.Exception -> throw Exception(
+                    response.throwable.message ?: "Failed to fetch tenants"
+                )
+            }
+
+        } catch (exception: Exception) {
+            throw Exception(exception.message ?: "Failed to fetch tenants")
+        }
+    }
 
     override suspend fun getTenants(): RepositoryResult<List<NetworkTenant>> = withContext(dispatcher) {
         try {
