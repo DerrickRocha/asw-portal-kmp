@@ -13,6 +13,8 @@ import org.example.asw_portal_kmp.data.Encryptor
 import org.example.asw_portal_kmp.data.KeyValuePairManager
 import org.example.asw_portal_kmp.data.KeyValuePairManagerImplementation
 import org.example.asw_portal_kmp.data.createDataStore
+import org.example.asw_portal_kmp.data.database.getDatabaseBuilder
+import org.example.asw_portal_kmp.data.database.getRoomDatabase
 import org.example.asw_portal_kmp.data.network.NetworkConfig
 import org.example.asw_portal_kmp.data.network.NetworkManagerImplementation
 import org.example.asw_portal_kmp.data.repositories.auth.AuthRepository
@@ -39,6 +41,8 @@ object Dependencies {
         }
         expectSuccess = true
     }
+
+    val database = getRoomDatabase(getDatabaseBuilder())
     private val store = createDataStore()
     private val encryptor = Encryptor()
     val kvManager: KeyValuePairManager = KeyValuePairManagerImplementation(store, encryptor)
@@ -47,7 +51,7 @@ object Dependencies {
     private val dispatcher = ioDispatcher()
     val authRepository: AuthRepository = AuthRepositoryImpl(networkManager, kvManager, dispatcher)
 
-    val tenantsRepository: TenantsRepository = TenantsRepositoryImplementation(networkManager, dispatcher)
+    val tenantsRepository: TenantsRepository = TenantsRepositoryImplementation(networkManager, dispatcher, database.getTenantDao())
 
     val appConfiguration = AppConfiguration(kvManager)
 

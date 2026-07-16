@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.mokkery)
     alias(libs.plugins.ktor.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
 }
 
 kotlin {
@@ -17,6 +19,7 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Shared"
             isStatic = true
+            linkerOpts.add("-lsqlite3")
         }
     }
 
@@ -36,6 +39,10 @@ kotlin {
         withHostTest {
             isIncludeAndroidResources = true
         }
+    }
+
+    room {
+        schemaDirectory("$projectDir/schemas")
     }
 
     sourceSets {
@@ -66,6 +73,8 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.collections)
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -81,4 +90,8 @@ kotlin {
 
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
+    add("kspJvm", libs.androidx.room.compiler)
 }
