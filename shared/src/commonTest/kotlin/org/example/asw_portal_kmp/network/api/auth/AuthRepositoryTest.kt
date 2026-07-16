@@ -9,10 +9,12 @@ import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.example.asw_portal_kmp.data.KeyValuePairManager
-import org.example.asw_portal_kmp.network.NetworkManager
-import org.example.asw_portal_kmp.network.NetworkResult
-import org.example.asw_portal_kmp.network.requests.LoginRequest
-import org.example.asw_portal_kmp.network.responses.LoginResponse
+import org.example.asw_portal_kmp.data.repositories.auth.AuthRepositoryImpl
+import org.example.asw_portal_kmp.data.repositories.auth.LoginResult
+import org.example.asw_portal_kmp.data.network.NetworkManager
+import org.example.asw_portal_kmp.data.network.NetworkResult
+import org.example.asw_portal_kmp.data.network.auth.LoginRequest
+import org.example.asw_portal_kmp.data.network.auth.LoginResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
-import org.example.asw_portal_kmp.network.api.auth.AuthRepository
-import org.example.asw_portal_kmp.network.api.auth.LoginResult
+import org.example.asw_portal_kmp.data.repositories.auth.AuthRepository
+import org.example.asw_portal_kmp.data.repositories.auth.LoginResult
 
 class LoginScreenViewModel(
     private val repository: AuthRepository = Dependencies.authRepository,

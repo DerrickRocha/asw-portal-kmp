@@ -3,17 +3,14 @@ package org.example.asw_portal_kmp.ui.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
-import org.example.asw_portal_kmp.network.api.RepositoryResult
-import org.example.asw_portal_kmp.network.api.tenants.AddTenantResponse
-import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
+import org.example.asw_portal_kmp.data.repositories.RepositoryResult
+import org.example.asw_portal_kmp.data.repositories.tenants.AddTenantResponse
+import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepository
 
 class AddTenantScreenViewModel(
     private val repository: TenantsRepository = Dependencies.tenantsRepository,

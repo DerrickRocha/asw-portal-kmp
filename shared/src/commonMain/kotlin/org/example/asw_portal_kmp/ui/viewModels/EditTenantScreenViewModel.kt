@@ -11,20 +11,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
-import org.example.asw_portal_kmp.network.api.RepositoryResult
-import org.example.asw_portal_kmp.network.api.tenants.Tenant
-import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
+import org.example.asw_portal_kmp.data.repositories.RepositoryResult
+import org.example.asw_portal_kmp.data.network.tenants.NetworkTenant
+import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepository
 
 class EditTenantScreenViewModel(
-    private val tenant: Tenant,
+    private val networkTenant: NetworkTenant,
     private val tenantRepository: TenantsRepository = Dependencies.tenantsRepository
 ): ViewModel() {
 
     private val _state = MutableStateFlow(
         EditTenantState(
-            name = tenant.name,
-            domain = tenant.subDomain,
-            customDomain = tenant.customDomain ?: ""
+            name = networkTenant.name,
+            domain = networkTenant.subDomain,
+            customDomain = networkTenant.customDomain ?: ""
         )
     )
     val state: StateFlow<EditTenantState> = _state.asStateFlow()
@@ -87,7 +87,7 @@ class EditTenantScreenViewModel(
             _state.update { it.copy(isLoading = true, generalError = null) }
 
             try {
-                val updatedTenant = tenant.copy(
+                val updatedTenant = networkTenant.copy(
                     name = currentState.name,
                     subDomain = currentState.domain,
                     customDomain = currentState.customDomain.takeIf { it.isNotBlank() }

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
-import org.example.asw_portal_kmp.network.api.auth.AuthRepository
+import org.example.asw_portal_kmp.data.repositories.auth.AuthRepository
 
 class SignupViewModel(
     private val repository: AuthRepository = Dependencies.authRepository,

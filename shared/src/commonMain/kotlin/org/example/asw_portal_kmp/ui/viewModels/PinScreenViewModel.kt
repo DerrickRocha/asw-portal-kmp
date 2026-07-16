@@ -5,16 +5,13 @@ import androidx.lifecycle.viewModelScope
 import io.ktor.utils.io.ioDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
-import org.example.asw_portal_kmp.network.api.auth.AuthRepository
-import org.example.asw_portal_kmp.network.api.auth.ConfirmResult
+import org.example.asw_portal_kmp.data.repositories.auth.AuthRepository
+import org.example.asw_portal_kmp.data.repositories.auth.ConfirmResult
 
 class PinScreenViewModel(
     private val email: String,

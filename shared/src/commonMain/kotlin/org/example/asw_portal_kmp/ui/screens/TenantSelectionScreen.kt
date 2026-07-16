@@ -39,14 +39,12 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,8 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.launch
-import org.example.asw_portal_kmp.network.api.tenants.Tenant
+import org.example.asw_portal_kmp.data.network.tenants.NetworkTenant
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionEvent
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionState
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionViewModel
@@ -67,7 +64,7 @@ import org.example.asw_portal_kmp.utils.DateUtils
 fun TenantSelectionScreen(
     onNavigateToTenantConsole: (Int) -> Unit,
     onNavigateToCreateTenant: () -> Unit,
-    onNavigateToEditTenant: (Tenant) -> Unit, // New callback
+    onNavigateToEditTenant: (NetworkTenant) -> Unit, // New callback
     refreshTrigger: Boolean = false,
 ) {
     val viewModel: TenantSelectionViewModel = viewModel {
@@ -114,14 +111,14 @@ fun TenantSelectionScreen(
 fun TenantSelectionScreenContent(
     state: TenantSelectionState,
     snackbarHostState: SnackbarHostState,
-    onTenantSelected: (Tenant) -> Unit,
-    onDeleteTenant: (Tenant) -> Unit,
-    onEditTenant: (Tenant) -> Unit,
+    onTenantSelected: (NetworkTenant) -> Unit,
+    onDeleteTenant: (NetworkTenant) -> Unit,
+    onEditTenant: (NetworkTenant) -> Unit,
     onCreateTenantClick: () -> Unit,
     onRetryClick: () -> Unit,
 ) {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
-    var tenantToDelete by remember { mutableStateOf<Tenant?>(null) }
+    var networkTenantToDelete by remember { mutableStateOf<NetworkTenant?>(null) }
 
     Scaffold(
         floatingActionButton = {
@@ -157,7 +154,7 @@ fun TenantSelectionScreenContent(
                     )
                 }
 
-                state.tenants.isEmpty() -> {
+                state.networkTenants.isEmpty() -> {
                     EmptyContent(
                         onCreateTenant = onCreateTenantClick
                     )
@@ -165,10 +162,10 @@ fun TenantSelectionScreenContent(
 
                 else -> {
                     TenantListContent(
-                        tenants = state.tenants,
+                        networkTenants = state.networkTenants,
                         onTenantSelected = onTenantSelected,
                         onDeleteTenant = { tenant ->
-                            tenantToDelete = tenant
+                            networkTenantToDelete = tenant
                             showDeleteConfirmation = true
                         },
                         onEditTenant = onEditTenant
@@ -178,24 +175,24 @@ fun TenantSelectionScreenContent(
         }
     }
     // Delete Confirmation Dialog
-    if (showDeleteConfirmation && tenantToDelete != null) {
+    if (showDeleteConfirmation && networkTenantToDelete != null) {
         AlertDialog(
             onDismissRequest = {
                 showDeleteConfirmation = false
-                tenantToDelete = null
+                networkTenantToDelete = null
             },
             title = {
                 Text("Delete Tenant")
             },
             text = {
-                Text("Are you sure you want to delete \"${tenantToDelete?.name}\"? This action cannot be undone.")
+                Text("Are you sure you want to delete \"${networkTenantToDelete?.name}\"? This action cannot be undone.")
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        tenantToDelete?.let { onDeleteTenant(it) }
+                        networkTenantToDelete?.let { onDeleteTenant(it) }
                         showDeleteConfirmation = false
-                        tenantToDelete = null
+                        networkTenantToDelete = null
                     },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.error
@@ -208,7 +205,7 @@ fun TenantSelectionScreenContent(
                 TextButton(
                     onClick = {
                         showDeleteConfirmation = false
-                        tenantToDelete = null
+                        networkTenantToDelete = null
                     }
                 ) {
                     Text("Cancel")
@@ -220,14 +217,14 @@ fun TenantSelectionScreenContent(
 
 @Composable
 fun TenantListContent(
-    tenants: ImmutableList<Tenant>,
-    onTenantSelected: (Tenant) -> Unit,
-    onDeleteTenant: (Tenant) -> Unit,
-    onEditTenant: (Tenant) -> Unit
+    networkTenants: ImmutableList<NetworkTenant>,
+    onTenantSelected: (NetworkTenant) -> Unit,
+    onDeleteTenant: (NetworkTenant) -> Unit,
+    onEditTenant: (NetworkTenant) -> Unit
 ) {
-    val stableClick = remember(onTenantSelected) { { tenant: Tenant -> onTenantSelected(tenant) } }
-    val stableDelete = remember(onDeleteTenant) { { tenant: Tenant -> onDeleteTenant(tenant) } }
-    val stableEdit = remember(onEditTenant) { { tenant: Tenant -> onEditTenant(tenant) } }
+    val stableClick = remember(onTenantSelected) { { networkTenant: NetworkTenant -> onTenantSelected(networkTenant) } }
+    val stableDelete = remember(onDeleteTenant) { { networkTenant: NetworkTenant -> onDeleteTenant(networkTenant) } }
+    val stableEdit = remember(onEditTenant) { { networkTenant: NetworkTenant -> onEditTenant(networkTenant) } }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -235,11 +232,11 @@ fun TenantListContent(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(
-            items = tenants,
+            items = networkTenants,
             key = { it.tenantId }
         ) { tenant ->
             TenantListItem(
-                tenant = tenant,
+                networkTenant = tenant,
                 onClick = { stableClick(it) },
                 onDelete = { stableDelete(it) },
                 onEdit = { stableEdit(it) }
@@ -250,10 +247,10 @@ fun TenantListContent(
 
 @Composable
 fun TenantListItem(
-    tenant: Tenant,
-    onClick: (Tenant) -> Unit,
-    onDelete: (Tenant) -> Unit,
-    onEdit: (Tenant) -> Unit
+    networkTenant: NetworkTenant,
+    onClick: (NetworkTenant) -> Unit,
+    onDelete: (NetworkTenant) -> Unit,
+    onEdit: (NetworkTenant) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -267,7 +264,7 @@ fun TenantListItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClick = {onClick(tenant)})
+                .clickable(onClick = {onClick(networkTenant)})
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
@@ -277,7 +274,7 @@ fun TenantListItem(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = tenant.name,
+                    text = networkTenant.name,
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
@@ -297,7 +294,7 @@ fun TenantListItem(
                         tint = MaterialTheme.colorScheme.primary
                     )
                     val customDomain =
-                        if (tenant.customDomain.isNullOrBlank()) tenant.subDomain else tenant.customDomain
+                        if (networkTenant.customDomain.isNullOrBlank()) networkTenant.subDomain else networkTenant.customDomain
                     Text(
                         text = "${customDomain}.agilesouthwest.com",
                         style = MaterialTheme.typography.bodyMedium,
@@ -320,7 +317,7 @@ fun TenantListItem(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = DateUtils.getTimeAgo(tenant.updatedAt),
+                        text = DateUtils.getTimeAgo(networkTenant.updatedAt),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -332,7 +329,7 @@ fun TenantListItem(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 IconButton(
-                    onClick = {onEdit(tenant)},
+                    onClick = {onEdit(networkTenant)},
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
@@ -344,7 +341,7 @@ fun TenantListItem(
                 }
 
                 IconButton(
-                    onClick = {onDelete(tenant)},
+                    onClick = {onDelete(networkTenant)},
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
@@ -462,8 +459,8 @@ fun EmptyContent(
 fun TenantSelectionScreenPreview() {
     TenantSelectionScreenContent(
         state = TenantSelectionState(
-            tenants = persistentListOf(
-                Tenant(
+            networkTenants = persistentListOf(
+                NetworkTenant(
                     1,
                     "Tenant 1",
                     "tenant1.yourapp.com",
@@ -472,7 +469,7 @@ fun TenantSelectionScreenPreview() {
                     "2023-01-02T12:00:00Z",
                     "2023-01-02T12:00:00Z"
                 ),
-                Tenant(
+                NetworkTenant(
                     2,
                     "Tenant 2",
                     "tenant2.yourapp.com",

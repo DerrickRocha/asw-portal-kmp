@@ -1,4 +1,4 @@
-package org.example.asw_portal_kmp.network.api.auth
+package org.example.asw_portal_kmp.data.repositories.auth
 
 sealed interface LoginResult {
     data object Success : LoginResult

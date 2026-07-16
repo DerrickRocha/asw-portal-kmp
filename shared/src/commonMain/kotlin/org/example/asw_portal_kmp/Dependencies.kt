@@ -13,13 +13,12 @@ import org.example.asw_portal_kmp.data.Encryptor
 import org.example.asw_portal_kmp.data.KeyValuePairManager
 import org.example.asw_portal_kmp.data.KeyValuePairManagerImplementation
 import org.example.asw_portal_kmp.data.createDataStore
-import org.example.asw_portal_kmp.network.NetworkConfig
-import org.example.asw_portal_kmp.network.NetworkManager
-import org.example.asw_portal_kmp.network.NetworkManagerImplementation
-import org.example.asw_portal_kmp.network.api.auth.AuthRepository
-import org.example.asw_portal_kmp.network.api.auth.AuthRepositoryImpl
-import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
-import org.example.asw_portal_kmp.network.api.tenants.TenantsRepositoryImplementation
+import org.example.asw_portal_kmp.data.network.NetworkConfig
+import org.example.asw_portal_kmp.data.network.NetworkManagerImplementation
+import org.example.asw_portal_kmp.data.repositories.auth.AuthRepository
+import org.example.asw_portal_kmp.data.repositories.auth.AuthRepositoryImpl
+import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepository
+import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepositoryImplementation
 
 object Dependencies {
 

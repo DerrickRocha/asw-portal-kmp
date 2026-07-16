@@ -1,4 +1,4 @@
-package org.example.asw_portal_kmp.network
+package org.example.asw_portal_kmp.data.network
 
 import android.content.pm.ApplicationInfo
 import android.os.Build
