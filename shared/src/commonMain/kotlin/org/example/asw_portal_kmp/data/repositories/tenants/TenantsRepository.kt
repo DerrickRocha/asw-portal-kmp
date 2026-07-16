@@ -26,6 +26,8 @@ interface TenantsRepository {
 
     suspend fun syncTenants()
 
+    suspend fun executeNetworkSync()
+
     suspend fun getTenants(): RepositoryResult<List<NetworkTenant>>
     suspend fun createTenant(name: String, domain: String, customDomain: String?): RepositoryResult<AddTenantResponse>
 
@@ -76,20 +78,19 @@ class TenantsRepositoryImplementation(
     override suspend fun syncTenants() {
         val dbTenants = tenantsDao.getAll()
         if (dbTenants.isEmpty()) {
-            immediateTenantsSync()
+            executeNetworkSync()
         } else {
-            val tenant = dbTenants.first()
-            if (tenant.lastModified.needsUpdate(10)) {
-                exponentialTenantsSync()
-            }
+            exponentialTenantsSync()
         }
     }
 
     private fun exponentialTenantsSync() {
-        TODO("Not yet implemented")
+        if (tenantsDao.getLastModified().needsUpdate(10)) {
+
+        }
     }
 
-    private suspend fun immediateTenantsSync() {
+    override suspend fun executeNetworkSync() {
         try {
             val response = networkManager.getJson<List<NetworkTenant>>(
                 url = "/tenants/all",
