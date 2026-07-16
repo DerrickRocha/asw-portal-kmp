@@ -1,21 +1,22 @@
-package org.example.asw_portal_kmp.network.api.auth
+package org.example.asw_portal_kmp.data.repositories.auth
 
 import io.ktor.utils.io.ioDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import org.example.asw_portal_kmp.data.KeyValuePairManager
-import org.example.asw_portal_kmp.network.AuthenticationException
-import org.example.asw_portal_kmp.network.JsonParsingException
-import org.example.asw_portal_kmp.network.NetworkManager
-import org.example.asw_portal_kmp.network.NetworkResult
-import org.example.asw_portal_kmp.network.TenantException
-import org.example.asw_portal_kmp.network.postJson
-import org.example.asw_portal_kmp.network.requests.ConfirmRequest
-import org.example.asw_portal_kmp.network.requests.LoginRequest
-import org.example.asw_portal_kmp.network.requests.SignupRequest
-import org.example.asw_portal_kmp.network.requests.SignupResponse
-import org.example.asw_portal_kmp.network.responses.ConfirmResponse
-import org.example.asw_portal_kmp.network.responses.LoginResponse
+import org.example.asw_portal_kmp.data.network.AuthenticationException
+import org.example.asw_portal_kmp.data.network.JsonParsingException
+import org.example.asw_portal_kmp.data.network.NetworkManager
+import org.example.asw_portal_kmp.data.network.NetworkResult
+import org.example.asw_portal_kmp.data.network.TenantException
+import org.example.asw_portal_kmp.data.network.postJson
+import org.example.asw_portal_kmp.data.network.auth.ConfirmRequest
+import org.example.asw_portal_kmp.data.network.auth.LoginRequest
+import org.example.asw_portal_kmp.data.network.auth.SignupRequest
+import org.example.asw_portal_kmp.data.network.auth.SignupResponse
+import org.example.asw_portal_kmp.data.network.auth.ConfirmResponse
+import org.example.asw_portal_kmp.data.network.auth.LoginResponse
 import org.example.asw_portal_kmp.ui.viewModels.SignupResult
 
 interface AuthRepository {
@@ -61,7 +62,7 @@ class AuthRepositoryImpl(
                         is JsonParsingException -> "Server response format error. Please contact support."
                         is AuthenticationException -> "Authentication error. Please try again."
                         is TenantException -> "Tenant configuration error. Please contact support."
-                        is kotlinx.coroutines.TimeoutCancellationException -> "Request timed out. Please try again."
+                        is TimeoutCancellationException -> "Request timed out. Please try again."
                         else -> "Login failed. Please try again later."
                     }
                     LoginResult.Failure(message)

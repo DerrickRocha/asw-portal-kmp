@@ -1,4 +1,4 @@
-package org.example.asw_portal_kmp.network.api
+package org.example.asw_portal_kmp.data.repositories
 
 sealed class RepositoryResult<out T> {
     data class Success<out T>(val data: T) : RepositoryResult<T>()

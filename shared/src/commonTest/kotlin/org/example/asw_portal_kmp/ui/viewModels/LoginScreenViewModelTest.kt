@@ -1,23 +1,15 @@
 package org.example.asw_portal_kmp.ui.viewModels
 
-import dev.mokkery.annotations.DelicateMokkeryApi
-import dev.mokkery.answering.Answer
 import dev.mokkery.answering.returns
-import dev.mokkery.answering.throws
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
-import dev.mokkery.verify
-import dev.mokkery.verify.VerifyMode
-import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.yield
-import org.example.asw_portal_kmp.network.api.auth.AuthRepository
-import org.example.asw_portal_kmp.network.api.auth.LoginResult
+import org.example.asw_portal_kmp.data.repositories.auth.AuthRepository
+import org.example.asw_portal_kmp.data.repositories.auth.LoginResult
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

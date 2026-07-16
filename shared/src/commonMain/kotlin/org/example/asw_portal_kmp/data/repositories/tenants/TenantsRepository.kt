@@ -1,26 +1,27 @@
-package org.example.asw_portal_kmp.network.api.tenants
+package org.example.asw_portal_kmp.data.repositories.tenants
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
-import org.example.asw_portal_kmp.network.NetworkManager
-import org.example.asw_portal_kmp.network.NetworkResult
-import org.example.asw_portal_kmp.network.api.RepositoryResult
-import org.example.asw_portal_kmp.network.RequestOptions
-import org.example.asw_portal_kmp.network.deleteJson
-import org.example.asw_portal_kmp.network.getJson
-import org.example.asw_portal_kmp.network.postJson
-import org.example.asw_portal_kmp.network.putJson
+import org.example.asw_portal_kmp.data.network.NetworkManager
+import org.example.asw_portal_kmp.data.network.NetworkResult
+import org.example.asw_portal_kmp.data.repositories.RepositoryResult
+import org.example.asw_portal_kmp.data.network.RequestOptions
+import org.example.asw_portal_kmp.data.network.tenants.NetworkTenant
+import org.example.asw_portal_kmp.data.network.deleteJson
+import org.example.asw_portal_kmp.data.network.getJson
+import org.example.asw_portal_kmp.data.network.postJson
+import org.example.asw_portal_kmp.data.network.putJson
 
 interface TenantsRepository {
 
-    suspend fun getTenants(): RepositoryResult<List<Tenant>>
+    suspend fun getTenants(): RepositoryResult<List<NetworkTenant>>
     suspend fun createTenant(name: String, domain: String, customDomain: String?): RepositoryResult<AddTenantResponse>
 
-    suspend fun getTenant(id: Int): RepositoryResult<Tenant>
+    suspend fun getTenant(id: Int): RepositoryResult<NetworkTenant>
 
     suspend fun deleteTenant(id: Int): RepositoryResult<Unit>
-    suspend fun updateTenant(updatedTenant: Tenant): RepositoryResult<Unit>
+    suspend fun updateTenant(updatedNetworkTenant: NetworkTenant): RepositoryResult<Unit>
 }
 
 class TenantsRepositoryImplementation(
@@ -28,9 +29,9 @@ class TenantsRepositoryImplementation(
     private val dispatcher: CoroutineDispatcher
 ) : TenantsRepository {
 
-    override suspend fun getTenants(): RepositoryResult<List<Tenant>> = withContext(dispatcher) {
+    override suspend fun getTenants(): RepositoryResult<List<NetworkTenant>> = withContext(dispatcher) {
         try {
-            val response = networkManager.getJson<List<Tenant>>(
+            val response = networkManager.getJson<List<NetworkTenant>>(
                 url = "/tenants/all",
                 options = RequestOptions(
                     isAuthRequired = true,
@@ -75,8 +76,8 @@ class TenantsRepositoryImplementation(
         }
     }
 
-    override suspend fun getTenant(id: Int): RepositoryResult<Tenant> = withContext(dispatcher) {
-        val networkResult = networkManager.getJson<Tenant>(
+    override suspend fun getTenant(id: Int): RepositoryResult<NetworkTenant> = withContext(dispatcher) {
+        val networkResult = networkManager.getJson<NetworkTenant>(
             "/tenants/$id",
             options = RequestOptions(isAuthRequired = true, isTenantRequired = false)
         )
@@ -98,8 +99,8 @@ class TenantsRepositoryImplementation(
         }
     }
 
-    override suspend fun updateTenant(updatedTenant: Tenant): RepositoryResult<Unit> {
-        val networkResult = networkManager.putJson<Tenant, Tenant>(url = "/tenants", options = RequestOptions(isAuthRequired = true, false), requestBody = updatedTenant)
+    override suspend fun updateTenant(updatedNetworkTenant: NetworkTenant): RepositoryResult<Unit> {
+        val networkResult = networkManager.putJson<NetworkTenant, NetworkTenant>(url = "/tenants", options = RequestOptions(isAuthRequired = true, false), requestBody = updatedNetworkTenant)
         return when (networkResult) {
             is NetworkResult.Success -> RepositoryResult.Success(Unit)
             is NetworkResult.Error -> RepositoryResult.Failure(networkResult.message)

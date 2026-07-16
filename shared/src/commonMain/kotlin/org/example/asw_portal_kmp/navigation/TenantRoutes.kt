@@ -9,7 +9,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import org.example.asw_portal_kmp.network.api.tenants.Tenant
+import org.example.asw_portal_kmp.data.network.tenants.NetworkTenant
 
 @Serializable
 sealed interface TenantRoute: NavKey {
@@ -24,7 +24,7 @@ sealed interface TenantRoute: NavKey {
     data object CreateTenant:TenantRoute
 
     @Serializable
-    data class EditTenant(val tenant: Tenant):TenantRoute
+    data class EditTenant(val networkTenant: NetworkTenant):TenantRoute
 
     @Serializable
     data object Products:TenantRoute

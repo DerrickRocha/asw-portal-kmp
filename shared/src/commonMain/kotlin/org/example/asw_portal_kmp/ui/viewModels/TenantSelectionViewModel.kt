@@ -15,9 +15,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
 import org.example.asw_portal_kmp.data.AppConfiguration
-import org.example.asw_portal_kmp.network.api.RepositoryResult
-import org.example.asw_portal_kmp.network.api.tenants.Tenant
-import org.example.asw_portal_kmp.network.api.tenants.TenantsRepository
+import org.example.asw_portal_kmp.data.repositories.RepositoryResult
+import org.example.asw_portal_kmp.data.network.tenants.NetworkTenant
+import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepository
 
 class TenantSelectionViewModel(
     private val repository: TenantsRepository = Dependencies.tenantsRepository,
@@ -56,9 +56,9 @@ class TenantSelectionViewModel(
                         )
                     }
 
-                    is RepositoryResult.Success<List<Tenant>> -> _state.update {
+                    is RepositoryResult.Success<List<NetworkTenant>> -> _state.update {
                         it.copy(
-                            tenants = result.data.toImmutableList(), // Safe conversion to stable type
+                            networkTenants = result.data.toImmutableList(), // Safe conversion to stable type
                             isLoading = false
                         )
                     }
@@ -74,10 +74,10 @@ class TenantSelectionViewModel(
         }
     }
 
-    fun selectTenant(tenant: Tenant) {
+    fun selectTenant(networkTenant: NetworkTenant) {
         viewModelScope.launch {
-            configuration.saveTenantId(tenant.tenantId)
-            _events.emit(TenantSelectionEvent.NavigateToTenantConsole(tenant.tenantId))
+            configuration.saveTenantId(networkTenant.tenantId)
+            _events.emit(TenantSelectionEvent.NavigateToTenantConsole(networkTenant.tenantId))
         }
     }
 
@@ -100,7 +100,7 @@ class TenantSelectionViewModel(
                     is RepositoryResult.Success<Unit> -> {
                         _state.update { currentState ->
                             currentState.copy(
-                                tenants = currentState.tenants.filter { it.tenantId != tenantId }.toImmutableList(),
+                                networkTenants = currentState.networkTenants.filter { it.tenantId != tenantId }.toImmutableList(),
                                 isDeleting = false,
                                 deleteError = null
                             )
@@ -121,7 +121,7 @@ class TenantSelectionViewModel(
 }
 
 data class TenantSelectionState(
-    val tenants: ImmutableList<Tenant> = persistentListOf(), // Guaranteed stable by Compose
+    val networkTenants: ImmutableList<NetworkTenant> = persistentListOf(), // Guaranteed stable by Compose
     val isLoading: Boolean = false,
     val loadError: String? = null,        // Specific to loading
     val deleteError: String? = null,      // Specific to deletion
