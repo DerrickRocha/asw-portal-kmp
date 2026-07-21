@@ -1,6 +1,8 @@
 package org.example.asw_portal_kmp.data.repositories.tenants
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -17,6 +19,8 @@ import org.example.asw_portal_kmp.data.network.deleteJson
 import org.example.asw_portal_kmp.data.network.getJson
 import org.example.asw_portal_kmp.data.network.postJson
 import org.example.asw_portal_kmp.data.network.putJson
+import org.example.asw_portal_kmp.data.schedulers.BackgroundConstraints
+import org.example.asw_portal_kmp.data.schedulers.BackgroundScheduler
 import org.example.asw_portal_kmp.utils.DateUtils.needsUpdate
 import kotlin.time.Clock
 
@@ -67,10 +71,9 @@ fun NetworkTenant.toEntity(): TenantEntity {
 class TenantsRepositoryImplementation(
     private val networkManager: NetworkManager,
     private val dispatcher: CoroutineDispatcher,
-    private val tenantsDao: TenantsDao
+    private val tenantsDao: TenantsDao,
+    private val scheduler: BackgroundScheduler,
 ) : TenantsRepository {
-
-
 
     override val tenants: Flow<List<Tenant>> =
         tenantsDao.getAllAsFlow().map { entities -> entities.map(TenantEntity::toTenant) }
@@ -86,7 +89,15 @@ class TenantsRepositoryImplementation(
 
     private suspend fun exponentialTenantsSync() {
         if (tenantsDao.getLastModified().needsUpdate(10)) {
-
+            scheduler.schedulePeriodicTask(
+                taskId = "data_sync",
+                workerName = "SyncDataWorker",
+                intervalMs = 30 * 60 * 1000L, // 30 minutes
+                constraints = BackgroundConstraints(
+                    requiresNetwork = true,
+                    requiresCharging = false
+                )
+            )
         }
     }
 
@@ -180,20 +191,31 @@ class TenantsRepositoryImplementation(
     }
 
     override suspend fun deleteTenant(id: Int): RepositoryResult<Unit> {
-        val networkResult = networkManager.deleteJson<Int>(url = "/tenants/$id", options = RequestOptions(isAuthRequired = true, isTenantRequired = false))
+        val networkResult = networkManager.deleteJson<Int>(
+            url = "/tenants/$id",
+            options = RequestOptions(isAuthRequired = true, isTenantRequired = false)
+        )
         return when (networkResult) {
             is NetworkResult.Success -> RepositoryResult.Success(Unit)
             is NetworkResult.Error -> RepositoryResult.Failure(networkResult.message)
-            is NetworkResult.Exception -> RepositoryResult.Failure(networkResult.throwable.message ?: "Failed to delete tenant")
+            is NetworkResult.Exception -> RepositoryResult.Failure(
+                networkResult.throwable.message ?: "Failed to delete tenant"
+            )
         }
     }
 
     override suspend fun updateTenant(updatedNetworkTenant: NetworkTenant): RepositoryResult<Unit> {
-        val networkResult = networkManager.putJson<NetworkTenant, NetworkTenant>(url = "/tenants", options = RequestOptions(isAuthRequired = true, false), requestBody = updatedNetworkTenant)
+        val networkResult = networkManager.putJson<NetworkTenant, NetworkTenant>(
+            url = "/tenants",
+            options = RequestOptions(isAuthRequired = true, false),
+            requestBody = updatedNetworkTenant
+        )
         return when (networkResult) {
             is NetworkResult.Success -> RepositoryResult.Success(Unit)
             is NetworkResult.Error -> RepositoryResult.Failure(networkResult.message)
-            is NetworkResult.Exception -> RepositoryResult.Failure(networkResult.throwable.message ?: "Failed to update tenant")
+            is NetworkResult.Exception -> RepositoryResult.Failure(
+                networkResult.throwable.message ?: "Failed to update tenant"
+            )
         }
     }
 

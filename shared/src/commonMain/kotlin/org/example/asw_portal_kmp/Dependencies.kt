@@ -21,12 +21,15 @@ import org.example.asw_portal_kmp.data.repositories.auth.AuthRepository
 import org.example.asw_portal_kmp.data.repositories.auth.AuthRepositoryImpl
 import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepository
 import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepositoryImplementation
+import org.example.asw_portal_kmp.data.schedulers.BackgroundSchedularFactory
 import org.example.asw_portal_kmp.data.schedulers.DefaultWorkerRegistry
 import org.example.asw_portal_kmp.data.schedulers.WorkerRegistry
+import org.example.asw_portal_kmp.data.schedulers.tenants.TenantsWorker
 
 object Dependencies {
 
-    val workerRegistry = DefaultWorkerRegistry()
+    val workerRegistry: WorkerRegistry = DefaultWorkerRegistry()
+
     private val networkConfig = NetworkConfig()
     private val client = HttpClient() {
         install(ContentNegotiation) {
@@ -54,7 +57,21 @@ object Dependencies {
     private val dispatcher = ioDispatcher()
     val authRepository: AuthRepository = AuthRepositoryImpl(networkManager, kvManager, dispatcher)
 
-    val tenantsRepository: TenantsRepository = TenantsRepositoryImplementation(networkManager, dispatcher, database.getTenantDao())
-
     val appConfiguration = AppConfiguration(kvManager)
+
+    init {
+        registerWorkers()
+    }
+
+    private val scheduler = BackgroundSchedularFactory().createScheduler()
+
+    val tenantsRepository: TenantsRepository =
+        TenantsRepositoryImplementation(networkManager, dispatcher, database.getTenantDao(), scheduler)
+
+    private fun registerWorkers() {
+        workerRegistry.registerWorker("tenants", TenantsWorker(tenantsRepository, dispatcher))
+    }
+
+
+
 }
