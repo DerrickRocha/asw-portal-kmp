@@ -23,5 +23,5 @@ interface TenantsDao {
     suspend fun getAll(): List<TenantEntity>
 
     @Query("SELECT MAX(updatedAt) FROM tenants")
-    fun getLastModified(): Long
+    suspend fun getLastModified(): Long
 }

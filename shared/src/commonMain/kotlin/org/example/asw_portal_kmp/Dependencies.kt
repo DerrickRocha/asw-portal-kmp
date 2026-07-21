@@ -21,9 +21,12 @@ import org.example.asw_portal_kmp.data.repositories.auth.AuthRepository
 import org.example.asw_portal_kmp.data.repositories.auth.AuthRepositoryImpl
 import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepository
 import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepositoryImplementation
+import org.example.asw_portal_kmp.data.schedulers.DefaultWorkerRegistry
+import org.example.asw_portal_kmp.data.schedulers.WorkerRegistry
 
 object Dependencies {
 
+    val workerRegistry = DefaultWorkerRegistry()
     private val networkConfig = NetworkConfig()
     private val client = HttpClient() {
         install(ContentNegotiation) {
@@ -54,5 +57,4 @@ object Dependencies {
     val tenantsRepository: TenantsRepository = TenantsRepositoryImplementation(networkManager, dispatcher, database.getTenantDao())
 
     val appConfiguration = AppConfiguration(kvManager)
-
 }

@@ -84,7 +84,7 @@ class TenantsRepositoryImplementation(
         }
     }
 
-    private fun exponentialTenantsSync() {
+    private suspend fun exponentialTenantsSync() {
         if (tenantsDao.getLastModified().needsUpdate(10)) {
 
         }
