@@ -64,7 +64,7 @@ object Dependencies {
     val tenantsRepository: TenantsRepository =
         TenantsRepositoryImplementation(networkManager, dispatcher, database.getTenantDao(), scheduler)
 
-    val workerNames: List<String> = listOf("tenants", "addTenant", "editTenant", "deleteTenant", "syncTenants")
+    val workerNames: List<String> = listOf("tenants")
     init {
         registerWorkers()
     }

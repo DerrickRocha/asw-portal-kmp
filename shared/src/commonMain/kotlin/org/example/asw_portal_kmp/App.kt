@@ -364,7 +364,7 @@ fun TenantNavDisplay(onLogoutClick: () -> Unit) {
                         is TenantRoute.EditTenant -> NavEntry(key = tenantKey, content = {
                             title = "Edit Tenant"
                             EditTenantScreen(
-                                tenantKey.networkTenant,
+                                tenantKey.tenant,
                                 onUpdateSuccess = {
                                     refreshTrigger = !refreshTrigger
                                     tenantsBackstack.removeLast()

@@ -15,8 +15,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
 import org.example.asw_portal_kmp.data.AppConfiguration
+import org.example.asw_portal_kmp.data.models.Tenant
 import org.example.asw_portal_kmp.data.repositories.RepositoryResult
-import org.example.asw_portal_kmp.data.network.tenants.NetworkTenant
 import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepository
 
 class TenantSelectionViewModel(
@@ -34,55 +34,27 @@ class TenantSelectionViewModel(
     val events = _events.asSharedFlow()
 
     init {
-        loadTenants()
-    }
-
-    fun loadTenants() {
+        _state.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isLoading = true,
-                    loadError = null,
-                    deleteError = null,
-                )
+            repository.tenants.collect { items ->
+                _state.update { it.copy(networkTenants = items.toImmutableList(), isLoading = false) }
             }
-
-            try {
-                when (val result = repository.getTenants()) {
-                    is RepositoryResult.Failure -> _state.update {
-                        it.copy(
-                            loadError = result.message,
-                            isLoading = false
-                        )
-                    }
-
-                    is RepositoryResult.Success<List<NetworkTenant>> -> _state.update {
-                        it.copy(
-                            networkTenants = result.data.toImmutableList(), // Safe conversion to stable type
-                            isLoading = false
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                _state.update {
-                    it.copy(
-                        loadError = e.message ?: "An error occurred",
-                        isLoading = false
-                    )
-                }
-            }
+        }
+        viewModelScope.launch {
+            repository.syncTenants()
         }
     }
 
-    fun selectTenant(networkTenant: NetworkTenant) {
+
+    fun selectTenant(networkTenant: Tenant) {
         viewModelScope.launch {
-            configuration.saveTenantId(networkTenant.tenantId)
-            _events.emit(TenantSelectionEvent.NavigateToTenantConsole(networkTenant.tenantId))
+            configuration.saveTenantId(networkTenant.id)
+            _events.emit(TenantSelectionEvent.NavigateToTenantConsole(networkTenant.id))
         }
     }
 
     fun retry() {
-        loadTenants()
+      //  loadTenants()
     }
 
     fun deleteTenant(tenantId: Int) {
@@ -100,7 +72,7 @@ class TenantSelectionViewModel(
                     is RepositoryResult.Success<Unit> -> {
                         _state.update { currentState ->
                             currentState.copy(
-                                networkTenants = currentState.networkTenants.filter { it.tenantId != tenantId }.toImmutableList(),
+                                networkTenants = currentState.networkTenants.filter { it.id != tenantId }.toImmutableList(),
                                 isDeleting = false,
                                 deleteError = null
                             )
@@ -121,7 +93,7 @@ class TenantSelectionViewModel(
 }
 
 data class TenantSelectionState(
-    val networkTenants: ImmutableList<NetworkTenant> = persistentListOf(), // Guaranteed stable by Compose
+    val networkTenants: ImmutableList<Tenant> = persistentListOf(), // Guaranteed stable by Compose
     val isLoading: Boolean = false,
     val loadError: String? = null,        // Specific to loading
     val deleteError: String? = null,      // Specific to deletion

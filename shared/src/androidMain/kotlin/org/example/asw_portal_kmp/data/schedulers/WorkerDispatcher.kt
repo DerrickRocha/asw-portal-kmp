@@ -8,13 +8,12 @@ import org.example.asw_portal_kmp.Dependencies
 class WorkerDispatcher(
     context: Context,
     params: WorkerParameters,
-    private val workerRegistry: WorkerRegistry = Dependencies.workerRegistry
 ) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
         val workerName = inputData.getString("worker_name") ?: return Result.failure()
         val inputData = inputData.getString("input_params")
 
-        val worker = workerRegistry.getWorker(workerName)
+        val worker = Dependencies.workerRegistry.getWorker(workerName)
             ?: return Result.failure()
 
         return try {

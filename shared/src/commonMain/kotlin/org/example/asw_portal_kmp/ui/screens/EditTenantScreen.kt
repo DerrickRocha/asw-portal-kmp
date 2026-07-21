@@ -39,14 +39,14 @@ import androidx.compose.ui.text.style.TextAlign.Companion.Center
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.example.asw_portal_kmp.data.network.tenants.NetworkTenant
+import org.example.asw_portal_kmp.data.models.Tenant
 import org.example.asw_portal_kmp.ui.viewModels.EditTenantEvent
 import org.example.asw_portal_kmp.ui.viewModels.EditTenantScreenViewModel
 import org.example.asw_portal_kmp.ui.viewModels.EditTenantState
 
 @Composable
 fun EditTenantScreen(
-    networkTenant: NetworkTenant,
+    networkTenant: Tenant,
     onUpdateSuccess: () -> Unit,
     onNavigateBack: () -> Unit
 ) {

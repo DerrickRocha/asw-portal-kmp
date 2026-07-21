@@ -11,20 +11,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
+import org.example.asw_portal_kmp.data.models.Tenant
 import org.example.asw_portal_kmp.data.repositories.RepositoryResult
-import org.example.asw_portal_kmp.data.network.tenants.NetworkTenant
 import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepository
 
 class EditTenantScreenViewModel(
-    private val networkTenant: NetworkTenant,
+    private val tenant: Tenant,
     private val tenantRepository: TenantsRepository = Dependencies.tenantsRepository
 ): ViewModel() {
 
     private val _state = MutableStateFlow(
         EditTenantState(
-            name = networkTenant.name,
-            domain = networkTenant.subDomain,
-            customDomain = networkTenant.customDomain ?: ""
+            name = tenant.name,
+            domain = tenant.subDomain,
+            customDomain = tenant.customDomain ?: ""
         )
     )
     val state: StateFlow<EditTenantState> = _state.asStateFlow()
@@ -87,7 +87,7 @@ class EditTenantScreenViewModel(
             _state.update { it.copy(isLoading = true, generalError = null) }
 
             try {
-                val updatedTenant = networkTenant.copy(
+                val updatedTenant = tenant.copy(
                     name = currentState.name,
                     subDomain = currentState.domain,
                     customDomain = currentState.customDomain.takeIf { it.isNotBlank() }
