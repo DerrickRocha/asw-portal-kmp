@@ -24,7 +24,7 @@ class TenantSelectionViewModel(
     private val configuration: AppConfiguration = Dependencies.appConfiguration,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(TenantSelectionState())
+    private val _state = MutableStateFlow(TenantSelectionState(isLoading = true))
     val state: StateFlow<TenantSelectionState> = _state.asStateFlow()
 
     private val _events = MutableSharedFlow<TenantSelectionEvent>(
@@ -34,7 +34,6 @@ class TenantSelectionViewModel(
     val events = _events.asSharedFlow()
 
     init {
-        _state.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             repository.tenants.collect { items ->
                 _state.update { it.copy(networkTenants = items.toImmutableList(), isLoading = false) }

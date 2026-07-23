@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import org.example.asw_portal_kmp.Dependencies
 import org.example.asw_portal_kmp.data.KeyValuePairManager
 
 class AppViewModel(private val keyValuePairManager: KeyValuePairManager) : ViewModel() {

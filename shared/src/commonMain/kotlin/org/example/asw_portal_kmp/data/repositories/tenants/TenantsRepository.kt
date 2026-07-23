@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -33,7 +34,6 @@ interface TenantsRepository {
 
     suspend fun executeNetworkSync()
 
-    suspend fun getTenants(): RepositoryResult<List<NetworkTenant>>
     suspend fun createTenant(name: String, domain: String, customDomain: String?): RepositoryResult<AddTenantResponse>
 
     suspend fun getTenant(id: Int): RepositoryResult<NetworkTenant>
@@ -80,6 +80,7 @@ class TenantsRepositoryImplementation(
         tenantsDao.getAllAsFlow().map { entities ->
             entities.map(TenantEntity::toTenant)
         }
+            .distinctUntilChanged()
             .flowOn(dispatcher)
 
     override suspend fun syncTenants() = withContext(dispatcher) {
@@ -91,12 +92,12 @@ class TenantsRepositoryImplementation(
         }
     }
 
-    private suspend fun exponentialTenantsSync() {
+    private suspend fun exponentialTenantsSync() = withContext(dispatcher) {
         if (tenantsDao.getLastModified().needsUpdate(10)) {
             scheduler.schedulePeriodicTask(
-                taskId = "data_sync",
+                taskId = "tenants",
                 workerName = "tenants",
-                intervalMs = 30 * 60 * 1000L, // 30 minutes
+                intervalMs = (60 * 1000L) * 15,
                 constraints = BackgroundConstraints(
                     requiresNetwork = true,
                     requiresCharging = false
@@ -120,44 +121,20 @@ class TenantsRepositoryImplementation(
                     tenantsDao.insertAll(entities)
                 }
 
-                is NetworkResult.Error -> throw Exception(response.message)
+                is NetworkResult.Error -> {
+                    throw Exception(response.message)
+                }
 
 
-                is NetworkResult.Exception -> throw Exception(
-                    response.throwable.message ?: "Failed to fetch tenants"
-                )
+                is NetworkResult.Exception -> {
+                    throw Exception(
+                        response.throwable.message ?: "Failed to fetch tenants"
+                    )
+                }
             }
 
         } catch (exception: Exception) {
             throw Exception(exception.message ?: "Failed to fetch tenants")
-        }
-    }
-
-    override suspend fun getTenants(): RepositoryResult<List<NetworkTenant>> = withContext(dispatcher) {
-        try {
-            val response = networkManager.getJson<List<NetworkTenant>>(
-                url = "/tenants/all",
-                options = RequestOptions(
-                    isAuthRequired = true,
-                    isTenantRequired = false
-                )
-            )
-
-            when (response) {
-                is NetworkResult.Success -> {
-                    RepositoryResult.Success(response.data)
-                }
-
-                is NetworkResult.Error -> {
-                    RepositoryResult.Failure(response.message)
-                }
-
-                is NetworkResult.Exception -> {
-                    RepositoryResult.Failure(response.throwable.message ?: "Failed to fetch tenants")
-                }
-            }
-        } catch (e: Exception) {
-            RepositoryResult.Failure(e.message ?: "An unexpected error occurred")
         }
     }
 

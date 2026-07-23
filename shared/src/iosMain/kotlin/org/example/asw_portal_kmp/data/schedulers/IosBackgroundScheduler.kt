@@ -68,7 +68,7 @@ class IosBackgroundScheduler: BackgroundScheduler {
         }
 
         if (error != null) {
-            NSLog("Failed to schedule iOS task: ${error?.localizedDescription}")
+            NSLog("Failed to schedule iOS task: ${error.localizedDescription}")
         } else {
             // Store the worker name for when the task is executed
             // This is set up in the AppDelegate registration

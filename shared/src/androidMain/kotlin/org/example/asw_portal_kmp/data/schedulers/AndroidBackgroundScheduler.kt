@@ -37,7 +37,7 @@ class AndroidBackgroundScheduler(
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             taskId,
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.REPLACE,
             workRequest
         )
     }

@@ -6,7 +6,8 @@ import Shared
 struct iOSApp: App {
 
     init() {
-        setupBackgroundTasks()
+        setupBackgroundTaskHandlers()
+        Dependencies.shared.setupBackgroundTasks()
     }
 
     var body: some Scene {
@@ -15,7 +16,7 @@ struct iOSApp: App {
         }
     }
 
-    private func setupBackgroundTasks() {
+    private func setupBackgroundTaskHandlers() {
 
         let identifiers = Dependencies.shared.workerNames
         for identifier in identifiers {

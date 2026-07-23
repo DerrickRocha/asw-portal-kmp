@@ -59,22 +59,15 @@ object Dependencies {
 
     val appConfiguration = AppConfiguration(kvManager)
 
-    private val scheduler = BackgroundSchedularFactory().createScheduler()
+    val scheduler = BackgroundSchedularFactory().createScheduler()
 
     val tenantsRepository: TenantsRepository =
         TenantsRepositoryImplementation(networkManager, dispatcher, database.getTenantDao(), scheduler)
 
     val workerNames: List<String> = listOf("tenants")
-    init {
-        registerWorkers()
-    }
 
-    private fun registerWorkers() {
+
+    fun setupBackgroundTasks() {
         workerRegistry.registerWorker(workerNames[0], TenantsWorker(tenantsRepository, dispatcher))
     }
-
-
-
-
-
 }
