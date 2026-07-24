@@ -22,7 +22,7 @@ actual class NetworkConfig {
         return if (isSimulator()) {
             "http://127.0.0.1:5100"  // Use 127.0.0.1 or localhost for simulator
         } else {
-            "http://192.168.1.100:5100"  // Your computer's IP for physical device
+            "http://10.0.0.124:5100"  // Your computer's IP for physical device
         }
     }
 

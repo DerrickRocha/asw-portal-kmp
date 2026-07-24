@@ -19,7 +19,7 @@ actual class NetworkConfig {
     private fun getDebugBaseUrl(): String {
         return when {
             isEmulator() -> "http://10.0.2.2:5100"
-            else -> "http://192.168.1.100:5100"  // Your computer's IP for physical device
+            else -> "http://10.0.0.124:5100"  // Your computer's IP for physical device
         }
     }
 

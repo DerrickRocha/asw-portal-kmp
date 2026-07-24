@@ -21,8 +21,14 @@ import org.example.asw_portal_kmp.data.repositories.auth.AuthRepository
 import org.example.asw_portal_kmp.data.repositories.auth.AuthRepositoryImpl
 import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepository
 import org.example.asw_portal_kmp.data.repositories.tenants.TenantsRepositoryImplementation
+import org.example.asw_portal_kmp.data.schedulers.BackgroundSchedularFactory
+import org.example.asw_portal_kmp.data.schedulers.DefaultWorkerRegistry
+import org.example.asw_portal_kmp.data.schedulers.WorkerRegistry
+import org.example.asw_portal_kmp.data.schedulers.tenants.TenantsWorker
 
 object Dependencies {
+
+    val workerRegistry: WorkerRegistry = DefaultWorkerRegistry()
 
     private val networkConfig = NetworkConfig()
     private val client = HttpClient() {
@@ -51,8 +57,22 @@ object Dependencies {
     private val dispatcher = ioDispatcher()
     val authRepository: AuthRepository = AuthRepositoryImpl(networkManager, kvManager, dispatcher)
 
-    val tenantsRepository: TenantsRepository = TenantsRepositoryImplementation(networkManager, dispatcher, database.getTenantDao())
-
     val appConfiguration = AppConfiguration(kvManager)
 
+    val scheduler = BackgroundSchedularFactory().createScheduler()
+
+    val tenantsRepository: TenantsRepository =
+        TenantsRepositoryImplementation(networkManager, dispatcher, database.getTenantDao(), scheduler)
+
+    val workerNames: List<String> = listOf("tenants")
+
+    fun setupBackgroundTasks() {
+        // Safe, non-indexed scaling pattern
+        workerNames.forEach { name ->
+            when (name) {
+                "tenants" -> workerRegistry.registerWorker(name, TenantsWorker(tenantsRepository, dispatcher))
+                // Future workers map here seamlessly...
+            }
+        }
+    }
 }

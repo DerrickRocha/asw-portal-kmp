@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import org.example.asw_portal_kmp.data.network.tenants.NetworkTenant
+import org.example.asw_portal_kmp.data.models.Tenant
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionEvent
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionState
 import org.example.asw_portal_kmp.ui.viewModels.TenantSelectionViewModel
@@ -64,7 +64,7 @@ import org.example.asw_portal_kmp.utils.DateUtils
 fun TenantSelectionScreen(
     onNavigateToTenantConsole: (Int) -> Unit,
     onNavigateToCreateTenant: () -> Unit,
-    onNavigateToEditTenant: (NetworkTenant) -> Unit, // New callback
+    onNavigateToEditTenant: (Tenant) -> Unit, // New callback
     refreshTrigger: Boolean = false,
 ) {
     val viewModel: TenantSelectionViewModel = viewModel {
@@ -75,7 +75,7 @@ fun TenantSelectionScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(refreshTrigger) {
-        viewModel.loadTenants()
+       // viewModel.loadTenants()
     }
 
     LaunchedEffect(viewModel.events) {
@@ -100,10 +100,10 @@ fun TenantSelectionScreen(
         state = state,
         snackbarHostState = snackbarHostState,
         onTenantSelected = { viewModel.selectTenant(it)},
-        onDeleteTenant = {viewModel.deleteTenant(it.tenantId)},
+        onDeleteTenant = {viewModel.deleteTenant(it.id)},
         onEditTenant = onNavigateToEditTenant,
         onCreateTenantClick = onNavigateToCreateTenant,
-        onRetryClick = { viewModel.loadTenants() },
+        onRetryClick = { viewModel.retry() },
     )
 }
 
@@ -111,14 +111,14 @@ fun TenantSelectionScreen(
 fun TenantSelectionScreenContent(
     state: TenantSelectionState,
     snackbarHostState: SnackbarHostState,
-    onTenantSelected: (NetworkTenant) -> Unit,
-    onDeleteTenant: (NetworkTenant) -> Unit,
-    onEditTenant: (NetworkTenant) -> Unit,
+    onTenantSelected: (Tenant) -> Unit,
+    onDeleteTenant: (Tenant) -> Unit,
+    onEditTenant: (Tenant) -> Unit,
     onCreateTenantClick: () -> Unit,
     onRetryClick: () -> Unit,
 ) {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
-    var networkTenantToDelete by remember { mutableStateOf<NetworkTenant?>(null) }
+    var networkTenantToDelete by remember { mutableStateOf<Tenant?>(null) }
 
     Scaffold(
         floatingActionButton = {
@@ -217,14 +217,14 @@ fun TenantSelectionScreenContent(
 
 @Composable
 fun TenantListContent(
-    networkTenants: ImmutableList<NetworkTenant>,
-    onTenantSelected: (NetworkTenant) -> Unit,
-    onDeleteTenant: (NetworkTenant) -> Unit,
-    onEditTenant: (NetworkTenant) -> Unit
+    networkTenants: ImmutableList<Tenant>,
+    onTenantSelected: (Tenant) -> Unit,
+    onDeleteTenant: (Tenant) -> Unit,
+    onEditTenant: (Tenant) -> Unit
 ) {
-    val stableClick = remember(onTenantSelected) { { networkTenant: NetworkTenant -> onTenantSelected(networkTenant) } }
-    val stableDelete = remember(onDeleteTenant) { { networkTenant: NetworkTenant -> onDeleteTenant(networkTenant) } }
-    val stableEdit = remember(onEditTenant) { { networkTenant: NetworkTenant -> onEditTenant(networkTenant) } }
+    val stableClick = remember(onTenantSelected) { { networkTenant: Tenant -> onTenantSelected(networkTenant) } }
+    val stableDelete = remember(onDeleteTenant) { { networkTenant: Tenant -> onDeleteTenant(networkTenant) } }
+    val stableEdit = remember(onEditTenant) { { networkTenant: Tenant -> onEditTenant(networkTenant) } }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -233,7 +233,7 @@ fun TenantListContent(
     ) {
         items(
             items = networkTenants,
-            key = { it.tenantId }
+            key = { it.id }
         ) { tenant ->
             TenantListItem(
                 networkTenant = tenant,
@@ -247,10 +247,10 @@ fun TenantListContent(
 
 @Composable
 fun TenantListItem(
-    networkTenant: NetworkTenant,
-    onClick: (NetworkTenant) -> Unit,
-    onDelete: (NetworkTenant) -> Unit,
-    onEdit: (NetworkTenant) -> Unit
+    networkTenant: Tenant,
+    onClick: (Tenant) -> Unit,
+    onDelete: (Tenant) -> Unit,
+    onEdit: (Tenant) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -460,7 +460,7 @@ fun TenantSelectionScreenPreview() {
     TenantSelectionScreenContent(
         state = TenantSelectionState(
             networkTenants = persistentListOf(
-                NetworkTenant(
+                Tenant(
                     1,
                     "Tenant 1",
                     "tenant1.yourapp.com",
@@ -469,7 +469,7 @@ fun TenantSelectionScreenPreview() {
                     "2023-01-02T12:00:00Z",
                     "2023-01-02T12:00:00Z"
                 ),
-                NetworkTenant(
+                Tenant(
                     2,
                     "Tenant 2",
                     "tenant2.yourapp.com",
