@@ -13,7 +13,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         open url: URL,
         options: [UIApplication.OpenURLOptionsKey: Any] = [:]
     ) -> Bool {
-        <#code#>
         // Initialize Multiplatform Dependencies First
         Dependencies.shared.setupBackgroundTasks()
 
