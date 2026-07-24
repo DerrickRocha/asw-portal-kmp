@@ -13,23 +13,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         open url: URL,
         options: [UIApplication.OpenURLOptionsKey: Any] = [:]
     ) -> Bool {
-        // Initialize Multiplatform Dependencies First
-        Dependencies.shared.setupBackgroundTasks()
 
-        // Register tasks instantly on launch
-        let identifiers = Dependencies.shared.workerNames
-        for identifier in identifiers {
-            BGTaskScheduler.shared.register(
-                forTaskWithIdentifier: identifier,
-                using: nil
-            ) { task in
-                // Safely forward down to our Kotlin executor bridge
-                IosTaskManager.shared.executeBackgroundTask(
-                    taskId: identifier,
-                    task: task as! BGAppRefreshTask
-                )
-            }
-        }
+
+
         return true
     }
 }

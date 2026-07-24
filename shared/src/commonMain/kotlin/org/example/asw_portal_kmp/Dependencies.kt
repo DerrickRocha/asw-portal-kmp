@@ -66,8 +66,13 @@ object Dependencies {
 
     val workerNames: List<String> = listOf("tenants")
 
-
     fun setupBackgroundTasks() {
-        workerRegistry.registerWorker(workerNames[0], TenantsWorker(tenantsRepository, dispatcher))
+        // Safe, non-indexed scaling pattern
+        workerNames.forEach { name ->
+            when (name) {
+                "tenants" -> workerRegistry.registerWorker(name, TenantsWorker(tenantsRepository, dispatcher))
+                // Future workers map here seamlessly...
+            }
+        }
     }
 }
