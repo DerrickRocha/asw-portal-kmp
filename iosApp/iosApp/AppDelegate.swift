@@ -9,11 +9,22 @@ import SwiftUI
 class AppDelegate: NSObject, UIApplicationDelegate {
 
     func application(
-        _ app: UIApplication,
-        open url: URL,
-        options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        // 1. Register handlers instantly (Prevents the crash)
+        BGTaskScheduler.shared.register(
+            forTaskWithIdentifier: "tenants",
+            using: nil
+        ) { task in
+            IosTaskManager.shared.executeBackgroundTask(
+                taskId: "tenants",
+                task: task as! BGAppRefreshTask
+            )
+        }
 
+        // 2. Initialize Kotlin worker registry registry ONLY (No scheduling yet!)
+        Dependencies.shared.setupBackgroundTasks()
 
 
         return true

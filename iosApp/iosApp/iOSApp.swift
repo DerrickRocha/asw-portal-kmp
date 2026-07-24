@@ -1,29 +1,30 @@
-import SwiftUI
 import BackgroundTasks
 import Shared
+import SwiftUI
 
 @main
 struct iOSApp: App {
 
-    init() {
-        // 1. CRITICAL: Register FIRST using a raw string so it's instantaneous
-        BGTaskScheduler.shared.register(
-            forTaskWithIdentifier: "tenants", // Hardcoded to match Info.plist exactly
-            using: nil
-        ) { task in
-            // Forward down to your KMP execution coordinator
-            IosTaskManager.shared.executeBackgroundTask(
-                taskId: "tenants",
-                task: task as! BGAppRefreshTask
-            )
-        }
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
-        // 2. Initialize your Kotlin KMP Dependencies AFTER registration
-        Dependencies.shared.setupBackgroundTasks()
-    }
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear {
+                    // Safe to schedule now that the app is active and visible
+                    Dependencies.shared.scheduler.schedulePeriodicTask(
+                        taskId: "tenants",
+                        workerName: "tenants",
+                        intervalMs: 15 * 60 * 1000,  // 15 minutes,
+                        constraints: BackgroundConstraints(
+                            requiresNetwork: true,
+                            requiresCharging: false,
+                            requiresDeviceIdle: false,
+                            requiresStorageNotLow: false,
+                            requiresUnmeteredNetwork: false
+                        )
+                    )
+                }
         }
     }
 }
