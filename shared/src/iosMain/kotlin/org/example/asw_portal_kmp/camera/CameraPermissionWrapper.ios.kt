@@ -16,11 +16,9 @@ import platform.AVFoundation.AVCaptureDevice
 import platform.AVFoundation.AVMediaTypeVideo
 import platform.AVFoundation.authorizationStatusForMediaType
 import platform.AVFoundation.requestAccessForMediaType
-import platform.darwin.dispatch_async
-
 
 @Composable
-public actual fun CameraPermissionWrapper(
+actual fun CameraPermissionWrapper(
     modifier: Modifier,
     onPermissionDenied: @Composable () -> Unit,
     onPermissionGranted: @Composable () -> Unit
