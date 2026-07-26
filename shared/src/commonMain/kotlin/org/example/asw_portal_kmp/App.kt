@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
@@ -45,7 +44,6 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies.kvManager
-import org.example.asw_portal_kmp.camera.CameraScreen
 import org.example.asw_portal_kmp.navigation.Route
 import org.example.asw_portal_kmp.navigation.TenantRoute
 import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack

@@ -17,7 +17,10 @@ import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies
 
 @Composable
-fun CameraScreen(cameraManager: CameraManager = Dependencies.cameraManager) {
+fun CameraScreen(
+    cameraManager: CameraManager = Dependencies.cameraManager,
+    onImageCaptured: (String) -> Unit = {}
+) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
 
@@ -52,7 +55,7 @@ fun CameraScreen(cameraManager: CameraManager = Dependencies.cameraManager) {
                     cameraManager.captureAndSaveImage()
                         .onSuccess { filePath ->
                             println("Photo saved successfully at: $filePath")
-                            // TODO: Pass path to your view model or preview container
+                            onImageCaptured(filePath)
                         }
                         .onFailure { error ->
                             println("Error capturing photo: ${error.message}")
