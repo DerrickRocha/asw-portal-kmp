@@ -1,10 +1,11 @@
 package org.example.asw_portal_kmp.data.schedulers
 
-import org.example.asw_portal_kmp.data.AndroidPlatform
+import org.example.asw_portal_kmp.AndroidApplication
+
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual class BackgroundSchedularFactory {
     actual fun createScheduler(): BackgroundScheduler {
-        return AndroidBackgroundScheduler(AndroidPlatform.applicationContext)
+        return AndroidBackgroundScheduler(AndroidApplication.getApplication())
     }
 }

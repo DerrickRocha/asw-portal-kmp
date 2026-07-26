@@ -19,7 +19,9 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -139,8 +141,7 @@ fun App() {
                         Route.TenantSelection -> NavEntry(
                             key = key,
                             content = {
-                                //TenantNavDisplay(viewModel::logout)
-                                CameraScreen()
+                                TenantNavDisplay(viewModel::logout)
                             })
 
                         else -> NavEntry(key = key, content = { Text("Unknown") })
@@ -201,8 +202,9 @@ fun TenantNavDisplay(onLogoutClick: () -> Unit) {
                     )
                 }
 
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier.padding(horizontal = 16.dp),
+                    thickness = DividerDefaults.Thickness,
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
 
@@ -262,8 +264,9 @@ fun TenantNavDisplay(onLogoutClick: () -> Unit) {
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier.padding(horizontal = 16.dp),
+                    thickness = DividerDefaults.Thickness,
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
 

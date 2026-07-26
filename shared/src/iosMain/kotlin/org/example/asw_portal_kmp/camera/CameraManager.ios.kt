@@ -10,6 +10,10 @@ import platform.AVFoundation.AVMediaTypeVideo
 actual class CameraManager() {
     val captureSession = AVCaptureSession()
 
+    init {
+        
+    }
+
     @OptIn(ExperimentalForeignApi::class)
     actual fun initialize(lifecycleOwner: Any) {
         // iOS manages lifecycles via UIViewController or custom hosting layers

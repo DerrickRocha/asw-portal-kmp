@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 
 @Composable
-public actual fun CameraPermissionWrapper(
+actual fun CameraPermissionWrapper(
     modifier: Modifier,
     onPermissionDenied: @Composable () -> Unit,
     onPermissionGranted: @Composable () -> Unit

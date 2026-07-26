@@ -2,8 +2,9 @@ package org.example.asw_portal_kmp.data.network
 
 import android.content.pm.ApplicationInfo
 import android.os.Build
-import org.example.asw_portal_kmp.data.AndroidPlatform
+import org.example.asw_portal_kmp.AndroidApplication
 
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual class NetworkConfig {
     actual fun getBaseUrl(): String {
         return when {
@@ -13,7 +14,7 @@ actual class NetworkConfig {
     }
 
     actual fun isDebug(): Boolean {
-        return (AndroidPlatform.applicationContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+        return (AndroidApplication.getApplication().applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     }
 
     private fun getDebugBaseUrl(): String {
