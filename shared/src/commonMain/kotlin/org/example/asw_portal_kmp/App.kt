@@ -43,6 +43,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies.kvManager
+import org.example.asw_portal_kmp.camera.CameraScreen
 import org.example.asw_portal_kmp.navigation.Route
 import org.example.asw_portal_kmp.navigation.TenantRoute
 import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack
@@ -138,7 +139,8 @@ fun App() {
                         Route.TenantSelection -> NavEntry(
                             key = key,
                             content = {
-                                TenantNavDisplay(viewModel::logout)
+                                //TenantNavDisplay(viewModel::logout)
+                                CameraScreen()
                             })
 
                         else -> NavEntry(key = key, content = { Text("Unknown") })

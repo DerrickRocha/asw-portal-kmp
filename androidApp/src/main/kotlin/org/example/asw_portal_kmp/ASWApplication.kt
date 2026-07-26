@@ -6,7 +6,8 @@ import org.example.asw_portal_kmp.data.initDataStore
 class ASWApplication: Application() {
     override fun onCreate() {
         super.onCreate()
-        initDataStore(this.applicationContext)
+        initDataStore(applicationContext)
         Dependencies.setupBackgroundTasks()
     }
+
 }

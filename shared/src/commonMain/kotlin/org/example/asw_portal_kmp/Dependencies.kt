@@ -8,6 +8,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.utils.io.ioDispatcher
 import kotlinx.serialization.json.Json
+import org.example.asw_portal_kmp.camera.createCameraManager
 import org.example.asw_portal_kmp.data.AppConfiguration
 import org.example.asw_portal_kmp.data.Encryptor
 import org.example.asw_portal_kmp.data.KeyValuePairManager
@@ -29,6 +30,7 @@ import org.example.asw_portal_kmp.data.schedulers.tenants.TenantsWorker
 object Dependencies {
 
     val workerRegistry: WorkerRegistry = DefaultWorkerRegistry()
+    val cameraManager = createCameraManager()
 
     private val networkConfig = NetworkConfig()
     private val client = HttpClient() {
