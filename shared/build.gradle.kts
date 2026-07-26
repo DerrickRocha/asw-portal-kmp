@@ -50,6 +50,11 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.android.workManager)
+            implementation(libs.camerax.core)
+            implementation(libs.camerax.lifecycle)
+            implementation(libs.camerax.video)
+            implementation(libs.camerax.extensions)
+            implementation(libs.camerax.view)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)

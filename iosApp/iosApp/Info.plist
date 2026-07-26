@@ -13,5 +13,8 @@
 		<string>fetch</string>
 		<string>processing</string>
 	</array>
+    <!-- Required: Camera access description -->
+    <key>NSCameraUsageDescription</key>
+    <string>We need camera access to capture photos and scan barcodes.</string>
 </dict>
 </plist>

@@ -107,13 +107,3 @@ data class PinScreenState(
     val isResending: Boolean = false,
     val error: String? = null
 )
-
-// Events
-
-// Result Types
-
-
-sealed class ResendPinResult {
-    object Success : ResendPinResult()
-    data class Failure(val error: String) : ResendPinResult()
-}
