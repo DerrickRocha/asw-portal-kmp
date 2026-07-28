@@ -43,6 +43,10 @@ sealed interface TenantRoute: NavKey {
     data object Help:TenantRoute
     @Serializable
     data object About:TenantRoute
+    @Serializable
+    data object CameraScreen:TenantRoute
+    @Serializable
+    data class ImagePreview(val fileDir: String):TenantRoute
 
 
 }

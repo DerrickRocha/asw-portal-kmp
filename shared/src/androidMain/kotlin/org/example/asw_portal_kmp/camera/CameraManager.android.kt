@@ -49,6 +49,7 @@ actual class CameraManager(
     }
 
     actual fun release() {
+        cameraProvider?.unbindAll()
         cameraProvider = null
     }
 

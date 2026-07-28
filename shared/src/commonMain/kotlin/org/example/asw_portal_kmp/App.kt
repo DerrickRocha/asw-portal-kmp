@@ -1,5 +1,8 @@
 package org.example.asw_portal_kmp
 
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -44,6 +47,8 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.launch
 import org.example.asw_portal_kmp.Dependencies.kvManager
+import org.example.asw_portal_kmp.camera.CameraScreen
+import org.example.asw_portal_kmp.camera.ImagePreviewScreen
 import org.example.asw_portal_kmp.navigation.Route
 import org.example.asw_portal_kmp.navigation.TenantRoute
 import org.example.asw_portal_kmp.navigation.rememberECommerceNavBackStack
@@ -153,7 +158,7 @@ fun App() {
 @Composable
 fun TenantNavDisplay(onLogoutClick: () -> Unit) {
 
-    val tenantsBackstack = rememberTenantNavBackStack(TenantRoute.TenantSelection)
+    val tenantsBackstack = rememberTenantNavBackStack(TenantRoute.CameraScreen)
     var refreshTrigger by remember { mutableStateOf(false) }
     var title by rememberSaveable { mutableStateOf("Agile Southwest Portal") }
 
@@ -329,6 +334,15 @@ fun TenantNavDisplay(onLogoutClick: () -> Unit) {
                     rememberSaveableStateHolderNavEntryDecorator(),
                     rememberViewModelStoreNavEntryDecorator()
                 ),
+                transitionSpec = {
+                    slideInHorizontally { it } togetherWith slideOutHorizontally { -it }
+                },
+                popTransitionSpec = {
+                    slideInHorizontally { -it } togetherWith slideOutHorizontally { it }
+                },
+                predictivePopTransitionSpec = {
+                    slideInHorizontally { -it } togetherWith slideOutHorizontally { it }
+                },
                 entryProvider = { tenantKey ->
                     when (tenantKey) {
                         is TenantRoute.TenantSelection -> {
@@ -375,6 +389,20 @@ fun TenantNavDisplay(onLogoutClick: () -> Unit) {
                                 onNavigateBack = { tenantsBackstack.removeLast() }
                             )
                         })
+
+                        is TenantRoute.CameraScreen -> NavEntry(key = tenantKey, content = {
+                            title = "Camera Screen"
+                            CameraScreen { fileDir ->
+                                tenantsBackstack.add(TenantRoute.ImagePreview(fileDir))
+                            }
+                        })
+
+                        is TenantRoute.ImagePreview -> NavEntry(
+                            key = tenantKey,
+                            content = {
+                                title = "Image Preview"
+                                ImagePreviewScreen(tenantKey.fileDir)
+                            })
 
                         else -> NavEntry(
                             key = tenantKey,
